@@ -59,6 +59,7 @@ function fnValidateForm(obj){
 
 function climm_crit_post_ONLOAD()
 {	
+	alert("test git");
 	var ObjForm = document.forms[0];
 	document.forms[0].funcCode.value = "A";
 	fnChangeFuncCode();
