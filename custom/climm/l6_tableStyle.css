@@ -1,0 +1,57 @@
+<style type="text/css">
+body {
+  background-color: #ccc;
+}
+
+.container {
+  width: 100%;
+  background-color: white;
+  
+}
+
+.table_1 {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: arial, sans-serif;
+}
+
+.td_1 {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+.tr_1:hover {background-color:#D5F9FE;}
+
+.tr_selected{
+	background-color:#D5F9FE;	
+}
+.tr_unselected{
+	background-color:white;	
+}
+
+.tr_2:nth-child(even) {
+  background-color: #dddddd;
+}
+
+.th_1 {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+  height: 30px"; 
+  font-weight: bold;  
+}
+
+/* try removing the "hack" below to see how the table overflows the .body */
+.hack1 {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.hack2 {
+  display: table-cell;
+  overflow-x: auto;
+  width: 100%;
+}
+</style>
