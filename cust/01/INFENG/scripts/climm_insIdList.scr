@@ -1,0 +1,187 @@
+#============================================================
+# IMPORTANT: Auto Generated Header. DO NOT CHANGE MANUALLY.
+# Product: Finacle Core
+# Category: User Defined
+# Script: slp_bank_code_list.scr
+# Type: NA|default
+# Description: These types of scripts do not belong to any particular category and are standalone scripts with no script specific repositories or fields.
+# Author: 
+# Date: 5/29/14 1:39 PM
+# Modification Log:
+#============================================================
+
+<--START
+CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
+	# Script body goes here
+	TRACE ON
+	
+	IF (REPEXISTS("CUST") == 0) THEN
+	#{
+		CREATEREP("CUST")
+	#}
+	ENDIF
+	IF (CLASSEXISTS("CUST", "CLIMM") == 0) THEN
+	#{
+		CREATECLASS("CUST", "CLIMM", 5)
+	#}
+	ENDIF
+	sv_a = urhk_B2K_printRepos("BANCS")
+	
+	CUST.CLIMM.recCount = "0"
+	CUST.CLIMM.insId = BANCS.INPUT.insId
+	print(CUST.CLIMM.insId)
+	CUST.CLIMM.funcCode = BANCS.INPUT.funcCode
+	print(CUST.CLIMM.funcCode)	
+	
+	if((CUST.CLIMM.funcCode=="M") OR (CUST.CLIMM.funcCode=="V") OR (CUST.CLIMM.funcCode=="X")) THEN
+	#{
+	#get Rec Count
+	sv_a = ""
+	sv_a = sv_a + "recCount|select count(*) from custom.cimm_mod_tbl where del_flg='N' "
+	PRINT(sv_a)
+	
+	sv_b = urhk_dbSelectWithBind(sv_a)
+	PRINT(sv_b)
+	IF(sv_b == 0) THEN
+	#{
+		CUST.CLIMM.recCount = BANCS.OUTPARAM.recCount
+	#}
+	ENDIF
+	
+	IF(CUST.CLIMM.recCount != "0") THEN
+	#{
+		sv_a =  "ins_id,cif_id,asset_grp_id,asset_id,insProvider| "
+		sv_a = sv_a + "select distinct ins_id,cif_id,asset_grp_id,asset_id,ins_done_by from custom.cimm_mod_tbl c1 where del_flg='N'  "
+		#sv_a = sv_a + " and not exists(select 1 from custom.cimm_tbl c2 where c2.asset_id = c1.asset_id) "
+		#sv_a = sv_a + " and not exists(select 1 from custom.cimm_mod_tbl c2 where c2.asset_id = c1.asset_id) "
+		#sv_a = sv_a + " where cimm_mod_tbl.ins_id='"+ CUST.CLIMM.insId +"' and del_flg='N' "
+		PRINT(sv_a)
+		
+		sv_b = urhk_dbCursorOpenWithBind(sv_a)
+		PRINT(sv_b)
+		
+		IF(sv_b == 0) THEN
+		#{
+			sv_e = BANCS.OUTPARAM.DB_CURSOR_NUMBER
+			sv_c = urhk_dbCursorFetch(sv_e)
+			
+			sv_x = 0
+			
+			WHILE(sv_c == 0)
+			#{
+			
+				sv_x = sv_x + 1
+				CUST.CLIMM.ins_id	= BANCS.OUTPARAM.ins_id
+				CUST.CLIMM.cif_id   = BANCS.OUTPARAM.cif_id
+				CUST.CLIMM.asset_grp_id	= BANCS.OUTPARAM.asset_grp_id
+				CUST.CLIMM.asset_id   = BANCS.OUTPARAM.asset_id
+				CUST.CLIMM.insProvider   = BANCS.OUTPARAM.insProvider
+				
+				sv_y = FORMAT$(sv_x,"%d")
+				PRINT(sv_y)
+				
+				sv_w = urhk_SetOrbOut("ins_id" + sv_y + "|" + CUST.CLIMM.ins_id)
+				sv_w = urhk_SetOrbOut("asset_grp_id" + sv_y + "|" + CUST.CLIMM.asset_grp_id) 
+				sv_w = urhk_SetOrbOut("asset_id" + sv_y + "|" + CUST.CLIMM.asset_id) 
+				sv_w = urhk_SetOrbOut("cif_id" + sv_y + "|" + CUST.CLIMM.cif_id)
+				sv_w = urhk_SetOrbOut("insProvider" + sv_y + "|" + CUST.CLIMM.insProvider)
+				
+				sv_c = urhk_dbCursorFetch(sv_e)
+			#}
+			DO
+			sv_u = urhk_dbCursorClose(sv_e)
+			if(sv_x == 0) then
+			#{
+				sv_u = "insId|"+CUST.CLIMM.ins_id
+				sv_v = urhk_SetOrbOut(sv_u)
+			#}
+			ENDIF
+		#}
+		ELSE
+		#{
+			sv_u = "insId|"+CUST.CLIMM.ins_id
+			sv_v = urhk_SetOrbOut(sv_u)
+		#}
+		ENDIF
+	#}
+	endif
+	#}
+	ENDIF
+	
+	if(CUST.CLIMM.funcCode=="I") THEN
+	#{
+	#get Rec Count
+	sv_a = ""
+	sv_a = sv_a + "recCount|select count(*) from custom.cimm_tbl where del_flg='N' and entity_cre_flg='Y' "
+	PRINT(sv_a)
+	
+	sv_b = urhk_dbSelectWithBind(sv_a)
+	PRINT(sv_b)
+	IF(sv_b == 0) THEN
+	#{
+		CUST.CLIMM.recCount = BANCS.OUTPARAM.recCount
+	#}
+	ENDIF
+	
+	IF(CUST.CLIMM.recCount != "0") THEN
+	#{
+		sv_a =  "ins_id,cif_id,asset_grp_id,asset_id,insProvider| "
+		sv_a = sv_a + "select distinct ins_id,cif_id,asset_grp_id,asset_id,ins_done_by from custom.cimm_tbl where del_flg='N'  "
+		#sv_a = sv_a + " where cimm_tbl.ins_id='"+ CUST.CLIMM.insId +"' and del_flg='N' "
+		PRINT(sv_a)
+		
+		sv_b = urhk_dbCursorOpenWithBind(sv_a)
+		PRINT(sv_b)
+		
+		IF(sv_b == 0) THEN
+		#{
+			sv_e = BANCS.OUTPARAM.DB_CURSOR_NUMBER
+			sv_c = urhk_dbCursorFetch(sv_e)
+			
+			sv_x = 0
+			
+			WHILE(sv_c == 0)
+			#{
+			
+				sv_x = sv_x + 1
+				CUST.CLIMM.ins_id	= BANCS.OUTPARAM.ins_id
+				CUST.CLIMM.cif_id   = BANCS.OUTPARAM.cif_id
+				CUST.CLIMM.asset_grp_id	= BANCS.OUTPARAM.asset_grp_id
+				CUST.CLIMM.asset_id   = BANCS.OUTPARAM.asset_id
+				CUST.CLIMM.insProvider   = BANCS.OUTPARAM.insProvider
+				
+				sv_y = FORMAT$(sv_x,"%d")
+				PRINT(sv_y)
+				
+				sv_w = urhk_SetOrbOut("ins_id" + sv_y + "|" + CUST.CLIMM.ins_id)
+				sv_w = urhk_SetOrbOut("asset_grp_id" + sv_y + "|" + CUST.CLIMM.asset_grp_id) 
+				sv_w = urhk_SetOrbOut("asset_id" + sv_y + "|" + CUST.CLIMM.asset_id) 
+				sv_w = urhk_SetOrbOut("cif_id" + sv_y + "|" + CUST.CLIMM.cif_id)
+				sv_w = urhk_SetOrbOut("insProvider" + sv_y + "|" + CUST.CLIMM.insProvider)
+				
+				sv_c = urhk_dbCursorFetch(sv_e)
+			#}
+			DO
+			sv_u = urhk_dbCursorClose(sv_e)
+			if(sv_x == 0) then
+			#{
+				sv_u = "insId|"+CUST.CLIMM.ins_id
+				sv_v = urhk_SetOrbOut(sv_u)
+			#}
+			ENDIF
+		#}
+		ELSE
+		#{
+			sv_u = "insId|"+CUST.CLIMM.ins_id
+			sv_v = urhk_SetOrbOut(sv_u)
+		#}
+		ENDIF
+	#}
+	endif
+	#}
+	ENDIF
+	
+	EXITSCRIPT
+	
+	TRACE OFF
+END-->

@@ -1,0 +1,110 @@
+#============================================================
+# IMPORTANT: Auto Generated Header. DO NOT CHANGE MANUALLY.
+# Product: Finacle Core
+# Category: User Defined
+# Script: slp_bank_code_list.scr
+# Type: NA|default
+# Description: These types of scripts do not belong to any particular category and are standalone scripts with no script specific repositories or fields.
+# Author: 
+# Date: 5/29/14 1:39 PM
+# Modification Log:
+#============================================================
+
+<--START
+CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
+	# Script body goes here
+	TRACE ON
+	
+	IF (REPEXISTS("CUST") == 0) THEN
+	#{
+		CREATEREP("CUST")
+	#}
+	ENDIF
+	IF (CLASSEXISTS("CUST", "CLIMM") == 0) THEN
+	#{
+		CREATECLASS("CUST", "CLIMM", 5)
+	#}
+	ENDIF
+	sv_a = urhk_B2K_printRepos("BANCS")
+	
+	CUST.CLIMM.recCount = "0"
+	CUST.CLIMM.assetGrpId = BANCS.INPUT.assetGrpId
+	print(CUST.CLIMM.assetGrpId)
+	
+	
+	#get Rec Count
+	sv_a = ""
+	sv_a = sv_a + "recCount|select count(*) from custom.lagm "
+	#where asst_group_id='" + CUST.CLIMM.assetGrpId + "' "
+	PRINT(sv_a)
+	
+	sv_b = urhk_dbSelectWithBind(sv_a)
+	PRINT(sv_b)
+	IF(sv_b == 0) THEN
+	#{
+		CUST.CLIMM.recCount = BANCS.OUTPARAM.recCount
+	#}
+	ENDIF
+	
+	IF(CUST.CLIMM.recCount != "0") THEN
+	#{
+		sv_a =  "asset_id, asset_code, dateofreg, asst_group_id,cif_id| "
+		sv_a = sv_a + " select asset_id,asset_code,asst_cre_date,lagm.asst_group_id,cif_id from custom.lagm,custom.lamm "
+		sv_a = sv_a + " where lagm.asst_group_id=lamm.asst_group_id "
+		sv_a = sv_a + "and lagm.asst_group_id='"+ CUST.CLIMM.assetGrpId +"' "
+		PRINT(sv_a)
+		
+		sv_b = urhk_dbCursorOpenWithBind(sv_a)
+		PRINT(sv_b)
+		
+		IF(sv_b == 0) THEN
+		#{
+			sv_e = BANCS.OUTPARAM.DB_CURSOR_NUMBER
+			sv_c = urhk_dbCursorFetch(sv_e)
+			
+			sv_x = 0
+			
+			WHILE(sv_c == 0)
+			#{
+			
+				sv_x = sv_x + 1
+				
+				CUST.CLIMM.asset_id	= BANCS.OUTPARAM.asset_id
+				CUST.CLIMM.asset_code	= BANCS.OUTPARAM.asset_code
+				CUST.CLIMM.dateofreg   = BANCS.OUTPARAM.dateofreg
+				CUST.CLIMM.asst_group_id	= BANCS.OUTPARAM.asst_group_id
+				CUST.CLIMM.cif_id	= BANCS.OUTPARAM.cif_id
+				
+				sv_y = FORMAT$(sv_x,"%d")
+				PRINT(sv_y)
+				
+				sv_w = urhk_SetOrbOut("asset_id" + sv_y + "|" + CUST.CLIMM.asset_id)
+				sv_w = urhk_SetOrbOut("asset_code" + sv_y + "|" + CUST.CLIMM.asset_code)
+				sv_w = urhk_SetOrbOut("dateofreg" + sv_y + "|" + CUST.CLIMM.dateofreg) 
+				sv_w = urhk_SetOrbOut("asst_group_id" + sv_y + "|" + CUST.CLIMM.asst_group_id)
+				sv_w = urhk_SetOrbOut("cif_id" + sv_y + "|" + CUST.CLIMM.cif_id)
+				
+				sv_c = urhk_dbCursorFetch(sv_e)
+			#}
+			DO
+			sv_u = urhk_dbCursorClose(sv_e)
+			if(sv_x == 0) then
+			#{
+				sv_u = "recCounter|"+CUST.CLIMM.recCount
+				sv_v = urhk_SetOrbOut(sv_u)
+			#}
+			ENDIF
+		#}
+		ELSE
+		#{
+			sv_u = "recCounter|"+CUST.CLIMM.recCount
+			sv_v = urhk_SetOrbOut(sv_u)
+		#}
+		ENDIF
+	##}
+	#ENDIF
+	
+	EXITSCRIPT
+	
+	TRACE OFF
+END-->

@@ -1,0 +1,62 @@
+#============================================================
+# IMPORTANT: Auto Generated Header. DO NOT CHANGE MANUALLY.
+# Product: Finacle Core
+# Category: User Defined
+# Script: slp_bank_code_list.scr
+# Type: NA|default
+# Description: These types of scripts do not belong to any particular category and are standalone scripts with no script specific repositories or fields.
+# Author: 
+# Date: 5/29/14 1:39 PM
+# Modification Log:
+#============================================================
+
+<--START
+CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
+	# Script body goes here
+	TRACE ON
+	
+	IF (REPEXISTS("CUST") == 0) THEN
+	#{
+		CREATEREP("CUST")
+	#}
+	ENDIF
+	IF (CLASSEXISTS("CUST", "CLIMM") == 0) THEN
+	#{
+		CREATECLASS("CUST", "CLIMM", 5)
+	#}
+	ENDIF
+	sv_a = urhk_B2K_printRepos("BANCS")
+	
+	CUST.CLIMM.recCount = "0"
+	CUST.CLIMM.assetGrpId = BANCS.INPUT.assetGrpId
+	print(CUST.CLIMM.assetGrpId)
+	
+		sv_a =  "cif_id| "
+		sv_a = sv_a + "select distinct cif_id from custom.lamm where del_flg='N' and asst_group_id='"+ CUST.CLIMM.assetGrpId +"' "
+		PRINT(sv_a)
+		
+		sv_b = urhk_dbSelectWithBind(sv_a)
+		PRINT(sv_b)
+		
+		IF(sv_b == 0) THEN
+		#{
+				CUST.CLIMM.cif_id	= BANCS.OUTPARAM.cif_id
+	
+		#}
+		ELSE
+		#{
+			CUST.CLIMM.cif_id = "ERR"
+		#}
+		ENDIF
+		
+		sv_u = "cifId|"+CUST.CLIMM.cif_id
+		sv_v = urhk_SetOrbOut(sv_u)
+
+
+	
+	
+	
+	EXITSCRIPT
+	
+	TRACE OFF
+END-->

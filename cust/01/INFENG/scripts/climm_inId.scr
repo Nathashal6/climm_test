@@ -1,0 +1,96 @@
+<--START
+	# Script body goes here
+	TRACE ON
+	
+	IF (REPEXISTS("CUST") == 0) THEN
+	#{
+		CREATEREP("CUST")
+	#}
+	ENDIF
+	IF (CLASSEXISTS("CUST", "CLIMM") == 0) THEN
+	#{
+		CREATECLASS("CUST", "CLIMM", 5)
+	#}
+	ENDIF
+	sv_a = urhk_B2K_printRepos("BANCS")
+	
+	CUST.CLIMM.recCount = "0"
+	CUST.CLIMM.insId = BANCS.INPUT.insId
+	print(CUST.CLIMM.insId)
+	
+	CUST.CLIMM.cif_id	= ""
+	CUST.CLIMM.asset_grp_id = ""
+	CUST.CLIMM.asset_id	= ""
+	CUST.CLIMM.ins_done_by = ""
+	
+	#get Rec Count
+	sv_a = ""
+	sv_a = sv_a + "recCount|select count(*) from custom.cimm_mod_tbl where ins_id='" + CUST.CLIMM.insId + "' and del_flg='N' "
+	PRINT(sv_a)
+	
+	sv_b = urhk_dbSelectWithBind(sv_a)
+	PRINT(sv_b)
+	IF(sv_b == 0) THEN
+	#{
+		CUST.CLIMM.recCount = BANCS.OUTPARAM.recCount
+	#}
+	ENDIF
+	
+	IF(CUST.CLIMM.recCount != "0") THEN
+	#{
+		sv_a =  "cif_id,asset_grp_id,asset_id,ins_done_by| "
+		sv_a = sv_a + "select cif_id,asset_grp_id,asset_id,ins_done_by from custom.cimm_mod_tbl   "
+		sv_a = sv_a + " where cimm_mod_tbl.ins_id='"+ CUST.CLIMM.insId +"' and del_flg='N' "
+		PRINT(sv_a)
+		
+		sv_b = urhk_dbSelectWithBind(sv_a)
+		PRINT(sv_b)
+		
+		IF(sv_b==0) then
+		#{
+			CUST.CLIMM.cif_id	= BANCS.OUTPARAM.cif_id
+			print(CUST.CLIMM.cif_id)
+			CUST.CLIMM.asset_grp_id	= BANCS.OUTPARAM.asset_grp_id
+			CUST.CLIMM.asset_id	= BANCS.OUTPARAM.asset_id
+			CUST.CLIMM.ins_done_by   = BANCS.OUTPARAM.ins_done_by
+			
+			
+			sv_c = "msg1|" + CUST.CLIMM.cif_id
+			sv_d = urhk_SetOrbOut(sv_c)
+			print(sv_d)
+			
+			sv_c = "msg2|" + CUST.CLIMM.asset_grp_id
+			sv_d = urhk_SetOrbOut(sv_c)
+			print(sv_d)
+			
+			sv_c = "msg3|" + CUST.CLIMM.asset_id
+			sv_d = urhk_SetOrbOut(sv_c)
+			print(sv_d)
+			
+			sv_c = "msg4|" + CUST.CLIMM.ins_done_by
+			sv_d = urhk_SetOrbOut(sv_c)
+			print(sv_d)
+		#}
+		ELSE
+		#{
+			CUST.CLIMM.cif_id	= "ERR"
+			sv_c = "msg1|ERR "
+			sv_d = urhk_SetOrbOut(sv_c)
+			print(sv_d)
+		#}
+		ENDIF
+	#}
+	else
+	#{
+		CUST.CLIMM.cif_id	= "ERR"
+		sv_c = "msg1|ERR "
+		sv_d = urhk_SetOrbOut(sv_c)
+		print(sv_d)
+	#}
+	ENDIF
+
+	
+	EXITSCRIPT
+	
+	TRACE OFF
+END-->

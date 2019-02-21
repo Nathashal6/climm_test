@@ -1,0 +1,92 @@
+<--START
+	# Script body goes here
+	TRACE ON
+	
+	IF (REPEXISTS("CUST") == 0) THEN
+	#{
+		CREATEREP("CUST")
+	#}
+	ENDIF
+	IF (CLASSEXISTS("CUST", "CLIMM") == 0) THEN
+	#{
+		CREATECLASS("CUST", "CLIMM", 5)
+	#}
+	ENDIF
+	sv_a = urhk_B2K_printRepos("BANCS")
+	
+	CUST.CLIMM.recCount = "0"
+	CUST.CLIMM.insId = BANCS.INPUT.insId
+	print(CUST.CLIMM.insId)
+	
+	CUST.CLIMM.coverVal	= ""
+	CUST.CLIMM.asset_grp_id = ""
+	CUST.CLIMM.asset_id	= ""
+	CUST.CLIMM.ins_done_by = "" 
+	CUST.CLIMM.isFailed = ""
+	
+	#get Rec Count
+	sv_a = ""
+	sv_a = sv_a + "recCount|select count(*) from custom.c_svrsetvar where module_name='INSUARANCE' and del_flg='N'  and sub_module_name='COVERTYPE'"
+	PRINT(sv_a)
+	
+	sv_b = urhk_dbSelectWithBind(sv_a)
+	PRINT(sv_b)
+	IF(sv_b == 0) THEN
+	#{
+		CUST.CLIMM.recCount = BANCS.OUTPARAM.recCount
+	#}
+	ENDIF
+	
+	IF(CUST.CLIMM.recCount != "0") THEN
+	#{
+		sv_a =  "coverVal| "
+		sv_a = sv_a + "select variable_value from custom.c_svrsetvar where module_name='INSUARANCE' and del_flg='N'  and sub_module_name='COVERTYPE'"
+		PRINT(sv_a)
+		
+		sv_z = urhk_dbCursorOpenWithBind(sv_a)
+		PRINT(sv_z)
+		IF(sv_z == 0) THEN
+		#{
+				CUST.CLIMM.txtRecCount = 0
+				sv_e = BANCS.OUTPARAM.DB_CURSOR_NUMBER
+				sv_c = urhk_dbCursorFetch(sv_e)
+				print(sv_c)
+
+			WHILE(sv_c == 0)
+			#{
+				CUST.CLIMM.coverVal    = 	CUST.CLIMM.coverVal    + "!" +	BANCS.OUTPARAM.coverVal
+				print(CUST.CLIMM.coverVal)
+				
+				CUST.CLIMM.txtRecCount = CINT(CUST.CLIMM.txtRecCount) + 1
+				sv_c = urhk_dbCursorFetch(sv_e)	
+						
+				#}
+				DO
+				sv_u = urhk_dbCursorClose(sv_e)
+
+					ENDOFSCRIPT:
+					
+			IF(CUST.CLIMM.isFailed == "Y") THEN
+			#{
+				CUST.CLIMM.coverVal = "ERR"
+				sv_c = "msg1|" + CUST.CLIMM.coverVal
+				sv_d = urhk_SetOrbOut(sv_c)
+				print(sv_d)
+				#}
+			ELSE
+			#{
+					sv_c = "msg1|" + CUST.CLIMM.coverVal
+					sv_d = urhk_SetOrbOut(sv_c)
+					print(sv_d)
+					
+					sv_c = "msg2|" + CUST.CLIMM.recCount
+					sv_d = urhk_SetOrbOut(sv_c)
+					print(sv_d)
+			#}
+			ENDIF
+
+	
+	EXITSCRIPT
+	
+	TRACE OFF
+END-->

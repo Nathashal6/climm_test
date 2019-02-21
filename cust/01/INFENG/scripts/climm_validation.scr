@@ -1,0 +1,406 @@
+#============================================================
+# IMPORTANT: Auto Generated Header. DO NOT CHANGE MANUALLY.
+# Product: Finacle Core
+# Category: User Defined
+# Script: l6_lagm_add.scr
+# Type: NA|default
+# Description: These types of scripts do not belong to any particular category and are standalone scripts with no script specific repositories or fields.
+# Author:Nalinw 
+# Date: 5/5/14 4:20 PM
+# Modification Log:
+#============================================================
+
+<--START
+CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
+	# Script body goes here
+	
+	TRACE ON
+	
+	IF (REPEXISTS("CUST") == 0) THEN
+	#{
+		CREATEREP("CUST")
+	#}
+	ENDIF
+	IF (CLASSEXISTS("CUST", "CLIMM") == 0) THEN
+	#{
+		CREATECLASS("CUST", "CLIMM", 5)
+	#}
+	ENDIF
+	CUST.CLIMM.isError = ""
+	CUST.CLIMM.errMsg = ""
+	CUST.CLIMM.successMsg = ""
+	
+	print(CUST.CLIMM.credAmt)
+	print(CUST.CLIMM.credPeriod)
+	
+
+	sv_s = urhk_B2k_printRepos("BANCS")
+	PRINT(sv_s)
+
+	CUST.CLIMM.funcCode = BANCS.INPUT.funcCode
+	CUST.CLIMM.assetGrpId = BANCS.INPUT.assetGrpId
+	
+	IF (CUST.CLIMM.funcCode=="V") THEN
+	#{	
+		
+		#Get Count
+		sv_a = ""
+		sv_a =  sv_a + "Count1|select count(*) "
+		sv_a =  sv_a + "from custom.CIMM_TBL "
+		sv_a = sv_a + "where asset_id = '" +CUST.CLIMM.assetId+ "' and cif_id = '" + CUST.CLIMM.cifId + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' "
+		sv_a = sv_a + "and del_flg = 'N' and entity_cre_flg = 'Y' "
+		print(sv_a)
+		
+		sv_b = urhk_dbSelectWithBind(sv_a)
+		PRINT(sv_b)
+		
+		IF(sv_b == 0) THEN
+		#{
+				CUST.CLIMM.Count1	= BANCS.OUTPARAM.Count1
+				print(CUST.CLIMM.Count1)
+					
+				if(CUST.CLIMM.Count1==0) THEN
+				#{
+					CUST.CLIMM.subFunction = "A"
+				#}
+				else
+				#{
+					CUST.CLIMM.subFunction = "N"
+				#}
+				endif
+		#}
+		else
+		#{
+		sv_u = urhk_SetOrbErr("RESULT_MSG|Query execution failed")
+		sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+		GOTO ENDOFSCRIPT
+		#}
+		endif
+		
+			
+		#Get foracid
+		sv_a = ""
+		sv_a =  sv_a + "foracid|select foracid "
+		sv_a =  sv_a + "from custom.c_ls_lam "
+		sv_a =  sv_a + "where asset_id ='"+CUST.CLIMM.assetGrpId+"' "
+		sv_a =  sv_a + "and DEL_FLG='N' and entity_cre_flg='Y' "
+		print(sv_a)
+		
+		sv_b = urhk_dbSelectWithBind(sv_a)
+		PRINT(sv_b)
+		
+		IF(sv_b == 0) THEN
+		#{
+				CUST.CLIMM.foracid	= BANCS.OUTPARAM.foracid
+				print(CUST.CLIMM.foracid)
+				If(CUST.CLIMM.foracid!="") then
+				#{
+					sv_u = urhk_SetOrbErr("RESULT_MSG|Account does not exist for the Asset")
+					sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+					GOTO ENDOFSCRIPT
+				
+				#}
+				endif
+				
+		#}
+		else
+		#{
+		#sv_u = urhk_SetOrbErr("RESULT_MSG|Account does not exist for the Asset")
+		#sv_u = urhk_SetOrbOut("SuccessOrFailure|Y")
+		GOTO ENDOFSCRIPT
+		#}
+		endif
+		
+		#Get Srl no info
+			sv_a = ""
+			sv_a =  sv_a + "srlNum|select distinct schdl_srl_num "
+			sv_a =  sv_a + "from custom.c_ls_lrs "
+			sv_a =  sv_a + "where foracid ='"+CUST.CLIMM.foracid+"' "
+			sv_a =  sv_a + "and DEL_FLG='N' and entity_cre_flg='Y' "
+			print(sv_a)
+			
+			sv_b = urhk_dbSelectWithBind(sv_a)
+			PRINT(sv_b)
+			
+			IF(sv_b == 0) THEN
+			#{
+					CUST.CLIMM.srlNum	= BANCS.OUTPARAM.srlNum
+					print(CUST.CLIMM.srlNum)
+			#}
+			else
+			#{
+			sv_u = urhk_SetOrbErr("RESULT_MSG|Query execution failed")
+			sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+			GOTO ENDOFSCRIPT
+			#}
+			endif
+		
+			#Get Count
+			sv_a = ""
+			sv_a =  sv_a + "Count|select count(*) "
+			sv_a =  sv_a + "from custom.C_LS_CHRGDMD "
+			sv_a =  sv_a + "where "
+			sv_a =  sv_a + "foracid='"+CUST.CLIMM.foracid+"' and event_id='LSINSU' "
+			sv_a =  sv_a + "and schdl_srl_num='"+CUST.CLIMM.srlNum+"' and dmd_date=to_date(to_char(sysdate,'dd-Mon-yy')) "
+			print(sv_a)
+			
+			sv_b = urhk_dbSelectWithBind(sv_a)
+			PRINT(sv_b)
+			
+			IF(sv_b == 0) THEN
+			#{
+					CUST.CLIMM.Count	= BANCS.OUTPARAM.Count
+					print(CUST.CLIMM.Count)
+					
+					CUST.CLIMM.dmdCount = cint(CUST.CLIMM.Count) + 1
+					print(CUST.CLIMM.dmdCount)
+						
+					
+			#}
+			else
+			#{
+			sv_u = urhk_SetOrbErr("RESULT_MSG|Query execution failed")
+			sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+			GOTO ENDOFSCRIPT
+			#}
+			endif
+		
+		if(CUST.CLIMM.subFunction == "N") then
+		#{
+			
+			sv_a = "ovduDate| "
+			sv_a = sv_a + "select date '"+BANCS.STDIN.BODDate+"' + integer '1' from dual "
+			print(sv_a)
+
+		if((CUST.CLIMM.credPeriod != 0) and  (CUST.CLIMM.credAmt != 0)) then
+		#{
+		
+			CUST.CLIMM.dmdAmt2 = CDOUBLE(CUST.CLIMM.premiumAmt) - CDOUBLE(CUST.CLIMM.credAmt)
+			print(CUST.CLIMM.dmdAmt2)
+			
+			sv_a = "dmdDate2| "
+			sv_a = sv_a + "select date '"+BANCS.STDIN.BODDate+"' + integer '"+CUST.CLIMM.credPeriod+"' from dual "
+			print(sv_a)
+			
+			sv_b = urhk_dbSelectWithBind(sv_a)
+			PRINT(sv_b)
+			
+			if(sv_b==0) then
+			#{
+				CUST.CLIMM.dmdDate2 = LEFT$(BANCS.OUTPARAM.dmdDate2,10)
+				print(CUST.CLIMM.dmdDate2)
+			
+			#}
+			endif
+	
+			sv_a = "ovduDate2| "
+			sv_a = sv_a + "select date '"+CUST.CLIMM.dmdDate2+"' + integer '1' from dual "
+			print(sv_a)
+			
+			sv_b = urhk_dbSelectWithBind(sv_a)
+			PRINT(sv_b)
+			
+			if(sv_b==0) then
+			#{
+				CUST.CLIMM.ovduDate2 = LEFT$(BANCS.OUTPARAM.ovduDate2,10)
+				print(CUST.CLIMM.ovduDate2)
+			
+			#}
+			endif
+			
+
+			#insert to table
+			sv_a = ""
+			sv_a =  sv_a + "Insert into CUSTOM.C_LS_CHRGDMD (foracid,event_id,schdl_srl_num,dmd_date,dmd_eff_date,dmd_ovdu_date,dmd_amt,dmd_adj_amt,penal_amt,penal_adj_amt, "
+			sv_a =  sv_a + "penal_calc_upto_date,last_adj_date,rcre_user_id,rcre_time,lchg_user_id,lchg_time, penal_appl_flg, dmd_Srl_num) "
+			sv_a =  sv_a + "values ('"+CUST.CLIMM.foracid+"','LSINSU','"+CUST.CLIMM.srlNum+"',sysdate,sysdate,to_date('"+CUST.CLIMM.ovduDate+"'), "
+			sv_a =  sv_a + "'"+CUST.CLIMM.dmdAmt2+"',0.00,null,null,null, "
+			sv_a =  sv_a + "null,'"+BANCS.STDIN.userId+"',sysdate,'"+BANCS.STDIN.userId+"',sysdate,'Y','"+CUST.CLIMM.dmdCount+"') "
+			
+			print(sv_a)
+			sv_b = urhk_dbSQLWithBind(sv_a)
+			PRINT(sv_b)
+			
+			IF(sv_b != 0) THEN
+			#{
+				CUST.CLIMM.isError = "Y"
+				CUST.CLIMM.errMsg = "Insertion failed for the C_LS_CHRGDMD table"
+			#}
+			ELSE
+			#{
+				CUST.CLIMM.isError = "N"
+				CUST.CLIMM.errMsg = "Insertion successful for the C_LS_CHRGDMD table"
+			#}
+			ENDIF	
+			
+			CUST.CLIMM.dmdCount2 = cint(CUST.CLIMM.dmdCount) + 1
+			print(CUST.CLIMM.dmdCount2)
+			
+			#insert to table
+			sv_a = ""
+			sv_a =  sv_a + "Insert into CUSTOM.C_LS_CHRGDMD (foracid,event_id,schdl_srl_num,dmd_date,dmd_eff_date,dmd_ovdu_date,dmd_amt,dmd_adj_amt,penal_amt,penal_adj_amt, "
+			sv_a =  sv_a + "penal_calc_upto_date,last_adj_date,rcre_user_id,rcre_time,lchg_user_id,lchg_time, penal_appl_flg, dmd_Srl_num) "
+			sv_a =  sv_a + "values ('"+CUST.CLIMM.foracid+"','LSINSU','"+CUST.CLIMM.srlNum+"','"+CUST.CLIMM.dmdDate2+"','"+CUST.CLIMM.dmdDate2+"',to_date('"+CUST.CLIMM.ovduDate2+"'), "
+			sv_a =  sv_a + "'"+CUST.CLIMM.credAmt+"',0.00,null,null,null, "
+			sv_a =  sv_a + "null,'"+BANCS.STDIN.userId+"',sysdate,'"+BANCS.STDIN.userId+"',sysdate,'Y','"+CUST.CLIMM.dmdCount2+"') "
+			
+			print(sv_a)
+			sv_b = urhk_dbSQLWithBind(sv_a)
+			PRINT(sv_b)
+			
+			IF(sv_b != 0) THEN
+			#{
+				CUST.CLIMM.isError = "Y"
+				CUST.CLIMM.errMsg = "Insertion failed for the C_LS_CHRGDMD table"
+			#}
+			ELSE
+			#{
+				CUST.CLIMM.isError = "N"
+				CUST.CLIMM.errMsg = "Insertion successful for the C_LS_CHRGDMD table"
+			#}
+			ENDIF	
+	#}
+	else
+	#{
+		sv_a = "ovduDate| "
+			sv_a = sv_a + "select date '"+BANCS.STDIN.BODDate+"' + integer '1' from dual "
+			print(sv_a)
+			
+			sv_b = urhk_dbSelectWithBind(sv_a)
+			PRINT(sv_b)
+			
+			if(sv_b==0) then
+			#{
+				CUST.CLIMM.ovduDate = LEFT$(BANCS.OUTPARAM.ovduDate,10)
+				print(CUST.CLIMM.ovduDate)
+			
+			#}
+			endif
+			
+			#insert to table
+			sv_a = ""
+			sv_a =  sv_a + "Insert into CUSTOM.C_LS_CHRGDMD (foracid,event_id,schdl_srl_num,dmd_date,dmd_eff_date,dmd_ovdu_date,dmd_amt,dmd_adj_amt,penal_amt,penal_adj_amt, "
+			sv_a =  sv_a + "penal_calc_upto_date,last_adj_date,rcre_user_id,rcre_time,lchg_user_id,lchg_time, penal_appl_flg, dmd_Srl_num) "
+			sv_a =  sv_a + "values ('"+CUST.CLIMM.foracid+"','LSINSU','"+CUST.CLIMM.srlNum+"','"+CUST.CLIMM.dmdDate2+"','"+CUST.CLIMM.dmdDate2+"',to_date('"+CUST.CLIMM.ovduDate2+"'), "
+			sv_a =  sv_a + "'"+CUST.CLIMM.credAmt+"',0.00,null,null,null, "
+			sv_a =  sv_a + "null,'"+BANCS.STDIN.userId+"',sysdate,'"+BANCS.STDIN.userId+"',sysdate,'Y','"+CUST.CLIMM.dmdCount+"') "
+			
+			print(sv_a)
+			sv_b = urhk_dbSQLWithBind(sv_a)
+			PRINT(sv_b)
+			
+			IF(sv_b != 0) THEN
+			#{
+				CUST.CLIMM.isError = "Y"
+				CUST.CLIMM.errMsg = "Insertion failed for the C_LS_CHRGDMD table"
+			#}
+			ELSE
+			#{
+				CUST.CLIMM.isError = "N"
+				CUST.CLIMM.errMsg = "Insertion successful for the C_LS_CHRGDMD table"
+			#}
+			ENDIF	
+		#}
+		endif	
+	
+	#}
+	else
+	#{
+		if((CUST.CLIMM.credPeriod != 0) and  (CUST.CLIMM.credAmt != 0)) then
+		#{
+		
+			CUST.CLIMM.dmdAmt2 = CDOUBLE(CUST.CLIMM.premiumAmt) - CDOUBLE(CUST.CLIMM.credAmt)
+			print(CUST.CLIMM.dmdAmt2)
+			
+			sv_a = "dmdDate2| "
+			sv_a = sv_a + "select date '"+BANCS.STDIN.BODDate+"' + integer '"+CUST.CLIMM.credPeriod+"' from dual "
+			print(sv_a)
+			
+			sv_b = urhk_dbSelectWithBind(sv_a)
+			PRINT(sv_b)
+			
+			if(sv_b==0) then
+			#{
+				CUST.CLIMM.dmdDate2 = LEFT$(BANCS.OUTPARAM.dmdDate2,10)
+				print(CUST.CLIMM.dmdDate2)
+			
+			#}
+			endif
+	
+			sv_a = "ovduDate2| "
+			sv_a = sv_a + "select date '"+CUST.CLIMM.dmdDate2+"' + integer '1' from dual "
+			print(sv_a)
+			
+			sv_b = urhk_dbSelectWithBind(sv_a)
+			PRINT(sv_b)
+			
+			if(sv_b==0) then
+			#{
+				CUST.CLIMM.ovduDate2 = LEFT$(BANCS.OUTPARAM.ovduDate2,10)
+				print(CUST.CLIMM.ovduDate2)
+			
+			#}
+			endif
+			
+
+			#insert to table
+			sv_a = ""
+			sv_a =  sv_a + "Insert into CUSTOM.C_LS_CHRGDMD (foracid,event_id,schdl_srl_num,dmd_date,dmd_eff_date,dmd_ovdu_date,dmd_amt,dmd_adj_amt,penal_amt,penal_adj_amt, "
+			sv_a =  sv_a + "penal_calc_upto_date,last_adj_date,rcre_user_id,rcre_time,lchg_user_id,lchg_time, penal_appl_flg, dmd_Srl_num) "
+			sv_a =  sv_a + "values ('"+CUST.CLIMM.foracid+"','LSINSU','"+CUST.CLIMM.srlNum+"',sysdate,sysdate,to_date('"+CUST.CLIMM.ovduDate2+"'), "
+			sv_a =  sv_a + "'"+CUST.CLIMM.dmdAmt2+"',0.00,null,null,null, "
+			sv_a =  sv_a + "null,'"+BANCS.STDIN.userId+"',sysdate,'"+BANCS.STDIN.userId+"',sysdate,'Y','"+CUST.CLIMM.dmdCount+"') "
+			
+			print(sv_a)
+			sv_b = urhk_dbSQLWithBind(sv_a)
+			PRINT(sv_b)
+			
+			IF(sv_b != 0) THEN
+			#{
+				CUST.CLIMM.isError = "Y"
+				CUST.CLIMM.errMsg = "Insertion failed for the C_LS_CHRGDMD table"
+			#}
+			ELSE
+			#{
+				CUST.CLIMM.isError = "N"
+				CUST.CLIMM.errMsg = "Insertion successful for the C_LS_CHRGDMD table"
+			#}
+			ENDIF	
+			
+			#insert to table
+			sv_a = ""
+			sv_a =  sv_a + "Insert into CUSTOM.C_LS_CHRGDMD (foracid,event_id,schdl_srl_num,dmd_date,dmd_eff_date,dmd_ovdu_date,dmd_amt,dmd_adj_amt,penal_amt,penal_adj_amt, "
+			sv_a =  sv_a + "penal_calc_upto_date,last_adj_date,rcre_user_id,rcre_time,lchg_user_id,lchg_time, penal_appl_flg, dmd_Srl_num) "
+			sv_a =  sv_a + "values ('"+CUST.CLIMM.foracid+"','LSINSU','"+CUST.CLIMM.srlNum+"','"+CUST.CLIMM.dmdDate2+"','"+CUST.CLIMM.dmdDate2+"',to_date('"+CUST.CLIMM.ovduDate2+"'), "
+			sv_a =  sv_a + "'"+CUST.CLIMM.credAmt+"',0.00,null,null,null, "
+			sv_a =  sv_a + "null,'"+BANCS.STDIN.userId+"',sysdate,'"+BANCS.STDIN.userId+"',sysdate,'Y','"+CUST.CLIMM.dmdCount+"') "
+			
+			print(sv_a)
+			sv_b = urhk_dbSQLWithBind(sv_a)
+			PRINT(sv_b)
+			
+			IF(sv_b != 0) THEN
+			#{
+				CUST.CLIMM.isError = "Y"
+				CUST.CLIMM.errMsg = "Insertion failed for the C_LS_CHRGDMD table"
+			#}
+			ELSE
+			#{
+				CUST.CLIMM.isError = "N"
+				CUST.CLIMM.errMsg = "Insertion successful for the C_LS_CHRGDMD table"
+			#}
+			ENDIF	
+	
+	#}
+	ENDIF
+#}
+endif
+
+#}
+endif
+	
+ENDOFSCRIPT:	
+	
+#	TRACE OFF
+		
+#END-->

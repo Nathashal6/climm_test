@@ -1,0 +1,71 @@
+#============================================================
+# IMPORTANT: Auto Generated Header. DO NOT CHANGE MANUALLY.
+# Product: Finacle Core
+# Category: User Defined
+# Script: pico_cifValidate.scr
+# Type: NA|default
+# Description: These types of scripts do not belong to any particular category and are standalone scripts with no script specific repositories or fields.
+# Author: 
+# Date: 4/24/14 9:45 AM
+# Modification Log:
+#============================================================
+#This script is use to populate informations of DR acct
+#SOL ,CCY,Account name
+<--START
+CHECKSUM="ba8be811f5077be45f410d6ec703fc23978fe673ea97737556480b1f42d87470"
+	# Script body goes here
+	TRACE ON
+	
+	IF (REPEXISTS("CUST") == 0) THEN
+	#{
+		CREATEREP("CUST")
+	#}
+	ENDIF
+	IF (CLASSEXISTS("CUST", "CLIMM") == 0) THEN
+	#{
+		CREATECLASS("CUST", "CLIMM", 5)
+	#}
+	ENDIF
+	
+	CUST.CLIMM.premiumAmt = BANCS.INPUT.premiumAmt
+	print(CUST.CLIMM.premiumAmt)
+	
+	CUST.CLIMM.recCount = 0
+	
+
+		sv_a = ""
+		sv_a = sv_a + "comissionAmt|select variable_value from custom.c_svrsetvar"
+		sv_a = sv_a + " where "
+		sv_a = sv_a + " variable_name ='COMISSION_VALUE' and module_name='LEASE' and sub_module_name='CLIMM' and del_flg='N' "
+		PRINT(sv_a)
+		
+		sv_b = urhk_dbSelectWithBind(sv_a)
+		PRINT(sv_b)
+
+		IF(sv_b==0) then
+		#{
+			CUST.CLIMM.comissionAmt = BANCS.OUTPARAM.comissionAmt
+			print(CUST.CLIMM.comissionAmt)
+
+			CUST.CLIMM.comission_Val = cdouble(CUST.CLIMM.premiumAmt) * cdouble(CUST.CLIMM.comissionAmt)/100.00
+			print(CUST.CLIMM.comission_Val)
+		#}
+		else
+		#{
+			CUST.CLIMM.comissionAmt = "ERR"
+			print(CUST.CLIMM.comissionAmt)
+		#}
+		endif
+		
+		sv_u = "msg1|"+ CUST.CLIMM.comission_Val
+		sv_z = urhk_SetOrbOut(sv_u)
+		print(sv_z)
+		GOTO ENDOFSCRIPT	
+	
+	
+	ENDOFSCRIPT:
+		
+		EXITSCRIPT
+		
+		TRACE OFF
+END-->

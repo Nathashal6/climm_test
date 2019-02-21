@@ -1,0 +1,122 @@
+#============================================================
+# IMPORTANT: Auto Generated Header. DO NOT CHANGE MANUALLY.
+# Product: Finacle Core
+# Category: User Defined
+# Script: l6_lagm_add.scr
+# Type: NA|default
+# Description: These types of scripts do not belong to any particular category and are standalone scripts with no script specific repositories or fields.
+# Author:Nalinw 
+# Date: 5/5/14 4:20 PM
+# Modification Log:
+#============================================================
+
+<--START
+CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
+	# Script body goes here
+	
+	TRACE ON
+	
+	IF (REPEXISTS("CUST") == 0) THEN
+	#{
+		CREATEREP("CUST")
+	#}
+	ENDIF
+	IF (CLASSEXISTS("CUST", "CLIMM") == 0) THEN
+	#{
+		CREATECLASS("CUST", "CLIMM", 5)
+	#}
+	ENDIF
+	CUST.CLIMM.isError = ""
+	CUST.CLIMM.errMsg = ""
+	CUST.CLIMM.successMsg = ""
+
+	sv_s = urhk_B2k_printRepos("BANCS")
+	PRINT(sv_s)
+
+	CUST.CLIMM.funcCode = BANCS.INPUT.funcCode
+	CUST.CLIMM.chekValA = BANCS.INPUT.chekValA
+	print(CUST.CLIMM.chekValA)
+	
+	
+	IF (CUST.CLIMM.funcCode=="V") THEN
+	#{	
+			sv_x = 1
+			CUST.CLIMM.txtRecCount = BANCS.INPUT.insCover2
+			print(CUST.CLIMM.txtRecCount)
+	
+		WHILE(sv_x < CUST.CLIMM.txtRecCount)
+		#{
+		sv_q = GETPOSITION(CUST.CLIMM.chekValA,"!")
+		CUST.CLIMM.chekVal=  MID$(CUST.CLIMM.chekValA, 0 ,sv_q - 1)
+		PRINT(CUST.CLIMM.chekVal)
+		CUST.CLIMM.chekValA = MID$(CUST.CLIMM.chekValA,sv_q,STRLEN(CUST.CLIMM.chekValA))
+		PRINT(CUST.CLIMM.chekValA)
+		
+		sv_q = GETPOSITION(CUST.CLIMM.policyDescA,"!")
+		CUST.CLIMM.policyDesc=  MID$(CUST.CLIMM.policyDescA, 0 ,sv_q - 1)
+		PRINT(CUST.CLIMM.chekVal)
+		CUST.CLIMM.policyDescA = MID$(CUST.CLIMM.policyDescA,sv_q,STRLEN(CUST.CLIMM.policyDescA))
+		PRINT(CUST.CLIMM.policyDescA)
+
+		sv_a = ""
+		sv_a = sv_a + "insert into CUSTOM.CIMM_COVER "
+		sv_a = sv_a + "select * from CUSTOM.CIMM_COVER_MOD "
+		sv_a = sv_a + "WHERE ins_id = '"+CUST.CLIMM.insId+"' "		
+		#sv_a = sv_a + "'"+CUST.CLIMM.policyDesc+"',"	
+		#sv_a = sv_a + "'"+CUST.CLIMM.chekVal+"') "
+		print(sv_a)
+				
+		sv_b = urhk_dbSqlWithBind(sv_a)
+		print(sv_b)
+		
+		IF(sv_b != 0) THEN
+		#{
+			CUST.CLIMM.isError = "Y"
+			CUST.CLIMM.errMsg = "Insertion failed for the Cover TABLE table"
+		#}
+		ELSE
+		#{
+			CUST.CLIMM.isError = "N"
+			CUST.CLIMM.errMsg = "Insertion successful for the cover table table"
+		#}
+		ENDIF	
+
+		sv_a = ""
+		sv_a = sv_a + "delete CUSTOM.CIMM_COVER_MOD "
+		sv_a = sv_a + "WHERE ins_id = '"+CUST.CLIMM.insId+"' "	
+		print(sv_a)
+				
+		sv_b = urhk_dbSqlWithBind(sv_a)
+		print(sv_b)
+		
+		IF(sv_b != 0) THEN
+		#{
+			CUST.CLIMM.isError = "Y"
+			CUST.CLIMM.errMsg = "Deletion failed for COVER TABLE"
+		#}
+		ELSE
+		#{
+			CUST.CLIMM.isError = "N"
+			CUST.CLIMM.errMsg = "Deletion successful for the COVER TABLE"
+		#}
+		ENDIF
+		
+		
+
+		ENDOFLOOP:
+		
+		sv_x = sv_x + 1
+	#}
+	DO
+	
+	
+	
+	
+	#}
+	ENDIF
+	
+#ENDOFSCRIPT:	
+	
+#	TRACE OFF
+		
+#END-->

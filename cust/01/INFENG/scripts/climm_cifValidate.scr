@@ -1,0 +1,72 @@
+#============================================================
+# IMPORTANT: Auto Generated Header. DO NOT CHANGE MANUALLY.
+# Product: Finacle Core
+# Category: User Defined
+# Script: pico_cifValidate.scr
+# Type: NA|default
+# Description: These types of scripts do not belong to any particular category and are standalone scripts with no script specific repositories or fields.
+# Author: 
+# Date: 4/24/14 9:45 AM
+# Modification Log:
+#============================================================
+#This script is use to populate informations of DR acct
+#SOL ,CCY,Account name
+<--START
+CHECKSUM="ba8be811f5077be45f410d6ec703fc23978fe673ea97737556480b1f42d87470"
+# Script body goes here
+TRACE ON
+IF (REPEXISTS("CUST") == 0) THEN
+#{
+CREATEREP("CUST")
+#}
+ENDIF
+IF (CLASSEXISTS("CUST", "CLIMM") == 0) THEN
+#{
+CREATECLASS("CUST", "CLIMM", 5)
+#}
+ENDIF
+CUST.CLIMM.cifId = BANCS.INPUT.cifId
+print(CUST.CLIMM.cifId)
+CUST.CLIMM.recCount = 0
+#get Rec Count
+sv_a = ""
+sv_a = sv_a + "recCount|select count(*) from crmuser.cmg "
+sv_a = sv_a + " where "
+sv_a = sv_a + " cif_id ='" + CUST.CLIMM.cifId + "' and entity_cre_flg='Y' "
+PRINT(sv_a)
+sv_b = urhk_dbSelectWithBind(sv_a)
+PRINT(sv_b)
+IF(sv_b == 0) THEN
+#{
+CUST.CLIMM.recCount = BANCS.OUTPARAM.recCount
+print(CUST.CLIMM.recCount)
+#}
+ENDIF
+if(CUST.CLIMM.recCount != 0) then
+#{
+sv_a = ""
+sv_a = sv_a + "CustName|select cust_name from crmuser.cmg "
+sv_a = sv_a + " where "
+sv_a = sv_a + " cif_id ='" + CUST.CLIMM.cifId + "' and entity_cre_flg='Y' "
+PRINT(sv_a)
+sv_b = urhk_dbSelectWithBind(sv_a)
+PRINT(sv_b)
+CUST.CLIMM.CustName = BANCS.OUTPARAM.CustName
+print(CUST.CLIMM.CustName)
+sv_u = "msg1|"+ CUST.CLIMM.CustName
+sv_z = urhk_SetOrbOut(sv_u)
+print(sv_z)
+GOTO ENDOFSCRIPT
+#}
+else
+#{
+sv_u = "msg1|ERR" 
+sv_z = urhk_SetOrbOut(sv_u)
+print(sv_z)
+GOTO ENDOFSCRIPT
+#}
+endif
+ENDOFSCRIPT:
+EXITSCRIPT
+TRACE OFF
+END-->

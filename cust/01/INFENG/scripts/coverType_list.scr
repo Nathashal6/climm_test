@@ -1,0 +1,568 @@
+#============================================================
+# IMPORTANT: Auto Generated Header. DO NOT CHANGE MANUALLY.
+# Product: Finacle Core
+# Category: User Defined
+# Script: l6_lagm_add.scr
+# Type: NA|default
+# Description: These types of scripts do not belong to any particular category and are standalone scripts with no script specific repositories or fields.
+# Author:Nalinw 
+# Date: 5/5/14 4:20 PM
+# Modification Log:
+#============================================================
+
+<--START
+CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
+	# Script body goes here
+	
+	TRACE ON
+	
+	IF (REPEXISTS("CUST") == 0) THEN
+	#{
+		CREATEREP("CUST")
+	#}
+	ENDIF
+	IF (CLASSEXISTS("CUST", "CLIMM") == 0) THEN
+	#{
+		CREATECLASS("CUST", "CLIMM", 5)
+	#}
+	ENDIF
+	CUST.CLIMM.isError = ""
+	CUST.CLIMM.errMsg = ""
+	CUST.CLIMM.successMsg = ""
+	CUST.CLIMM.insCover2 = ""
+	CUST.CLIMM.isFailed = ""
+
+	sv_s = urhk_B2k_printRepos("BANCS")
+	PRINT(sv_s)
+
+	CUST.CLIMM.insId = BANCS.INPUT.insId
+	print(CUST.CLIMM.insId)
+
+	
+	IF (CUST.CLIMM.funcCode=="M") THEN
+	#{	
+		sv_q = "txtrecCount|"
+		sv_q = sv_q + "select count(*) from CUSTOM.CIMM_COVER_MOD "
+		sv_q = sv_q + " where ins_id = '" +CUST.CLIMM.insId+ "' "
+		#sv_q = sv_q + " and del_flg = 'N' " 
+		PRINT(sv_q)
+	
+		sv_z = urhk_dbSelectWithBind(sv_q)
+		print(sv_z)
+		
+		IF (sv_z == 0) THEN
+		#{
+			sv_x = 1
+			CUST.CLIMM.txtrecCount = BANCS.OUTPARAM.txtrecCount
+			print(CUST.CLIMM.txtrecCount)
+			
+			IF(CUST.CLIMM.txtrecCount != "0") THEN
+			#{
+				sv_r = "insId,insCover2 | "
+				sv_r = sv_r + "select ins_id,cover_flg "
+				sv_r = sv_r + "from  CUSTOM.CIMM_COVER_MOD where ins_id='" + CUST.CLIMM.insId + "' "
+				#sv_r = sv_r + "  and del_flg = 'N' "
+				sv_r = sv_r + " and ins_id= '" +CUST.CLIMM.insId+ "' "
+				print(sv_r)
+				
+				sv_z = urhk_dbCursorOpenWithBind(sv_r)
+                PRINT(sv_z)
+				IF(sv_z == 0) THEN
+                #{
+						CUST.CLIMM.txtRecCount = 0
+                        sv_e = BANCS.OUTPARAM.DB_CURSOR_NUMBER
+                        sv_c = urhk_dbCursorFetch(sv_e)
+						print(sv_c)
+
+                    WHILE(sv_c == 0)
+					#{
+						CUST.CLIMM.insCover2    = 	CUST.CLIMM.insCover2    + "!" +	BANCS.OUTPARAM.insCover2
+						CUST.CLIMM.insId  = 	CUST.CLIMM.insId  + "!" +	BANCS.OUTPARAM.insId
+						#CUST.CLIMM.selectVal  = 	CUST.CLIMM.selectVal  + "!" +	BANCS.OUTPARAM.selectVal
+	
+						CUST.CLIMM.txtRecCount = CINT(CUST.CLIMM.txtRecCount) + 1
+						sv_c = urhk_dbCursorFetch(sv_e)	
+						
+					#}
+					DO
+					sv_u = urhk_dbCursorClose(sv_e)
+		
+					IF(CUST.CLIMM.isFailed == "Y") THEN
+					#{
+						sv_u = urhk_SetOrbOut("Error|Y")
+						sv_c = "Error_1|ERROR^" + CUST.CLIMM.errMsg
+						sv_u = urhk_SetOrbOut(sv_c)
+						sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+						#}
+					ELSE
+						#{
+						print(CUST.CLIMM.insCover2)
+						sv_c = "insCover2|" + CUST.CLIMM.insCover2
+						sv_d = urhk_SetOrbOut(sv_c)
+						print(sv_d)
+	
+						sv_c = "insId|" + CUST.CLIMM.insId
+						sv_d = urhk_SetOrbOut(sv_c)
+						print(sv_d)
+	
+						#sv_c = "selectVal|" + CUST.CLIMM.selectVal
+						#sv_d = urhk_SetOrbOut(sv_c)
+						#print(sv_d)
+	
+						sv_c = "txtRecCount|" + CUST.CLIMM.txtRecCount
+						sv_d = urhk_SetOrbOut(sv_c)
+						print(sv_d)
+						
+						sv_c = urhk_SetOrbOut("SuccessOrFailure|Y")
+						print(sv_c)
+				
+                #}
+				ENDIF
+		#}
+		ELSE
+		#{
+				CUST.CLIMM.errMsg = CUST.CLIMM.errMsg	+ "Data Not Found"
+				CUST.CLIMM.isError = "Y"
+				GOTO ENDOFSCRIPT
+		#}
+		ENDIF
+	#}
+	ELSE
+	#{
+			 BANCS.OUTPUT.successOrFailure = "F"
+			 sv_u = urhk_SetOrbErr("RESULT_MSG|Nothing To Modify")
+
+	#}
+	ENDIF
+	#}
+	else
+	#{
+		BANCS.OUTPUT.successOrFailure = "F"
+		sv_u = urhk_SetOrbErr("RESULT_MSG|Nothing To Modify")
+	#}
+	endif
+#}
+endif
+	
+	IF (CUST.CLIMM.funcCode=="V") THEN
+	#{	
+		sv_q = "txtrecCount|"
+		sv_q = sv_q + "select count(*) from CUSTOM.CIMM_COVER_MOD "
+		sv_q = sv_q + " where ins_id = '" +CUST.CLIMM.insId+ "' "
+		#sv_q = sv_q + " and del_flg = 'N' " 
+		PRINT(sv_q)
+	
+		sv_z = urhk_dbSelectWithBind(sv_q)
+		print(sv_z)
+		
+		IF (sv_z == 0) THEN
+		#{
+			sv_x = 1
+			CUST.CLIMM.txtrecCount = BANCS.OUTPARAM.txtrecCount
+			print(CUST.CLIMM.txtrecCount)
+			
+			IF(CUST.CLIMM.txtrecCount != "0") THEN
+			#{
+				sv_r = "insId,insCover2| "
+				sv_r = sv_r + "select ins_id,cover_flg "
+				sv_r = sv_r + "from  CUSTOM.CIMM_COVER_MOD where ins_id='" + CUST.CLIMM.insId + "' "
+				#sv_r = sv_r + "  and del_flg = 'N' "
+				sv_r = sv_r + " and ins_id= '" +CUST.CLIMM.insId+ "' "
+				print(sv_r)
+				
+				sv_z = urhk_dbCursorOpenWithBind(sv_r)
+                PRINT(sv_z)
+				IF(sv_z == 0) THEN
+                #{
+						CUST.CLIMM.txtRecCount = 0
+                        sv_e = BANCS.OUTPARAM.DB_CURSOR_NUMBER
+                        sv_c = urhk_dbCursorFetch(sv_e)
+						print(sv_c)
+
+                    WHILE(sv_c == 0)
+					#{
+						CUST.CLIMM.insCover2    = 	CUST.CLIMM.insCover2    + "!" +	BANCS.OUTPARAM.insCover2
+						CUST.CLIMM.insId  = 	CUST.CLIMM.insId  + "!" +	BANCS.OUTPARAM.insId
+						#CUST.CLIMM.selectVal  = 	CUST.CLIMM.selectVal  + "!" +	BANCS.OUTPARAM.selectVal
+	
+						CUST.CLIMM.txtRecCount = CINT(CUST.CLIMM.txtRecCount) + 1
+						sv_c = urhk_dbCursorFetch(sv_e)	
+						
+					#}
+					DO
+					sv_u = urhk_dbCursorClose(sv_e)
+		
+					IF(CUST.CLIMM.isFailed == "Y") THEN
+					#{
+						sv_u = urhk_SetOrbOut("Error|Y")
+						sv_c = "Error_1|ERROR^" + CUST.CLIMM.errMsg
+						sv_u = urhk_SetOrbOut(sv_c)
+						sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+						#}
+					ELSE
+						#{
+						print(CUST.CLIMM.insCover2)
+						sv_c = "insCover2|" + CUST.CLIMM.insCover2
+						sv_d = urhk_SetOrbOut(sv_c)
+						print(sv_d)
+	
+						sv_c = "insId|" + CUST.CLIMM.insId
+						sv_d = urhk_SetOrbOut(sv_c)
+						print(sv_d)
+	
+						#sv_c = "selectVal|" + CUST.CLIMM.selectVal
+						#sv_d = urhk_SetOrbOut(sv_c)
+						#print(sv_d)
+	
+						sv_c = "txtRecCount|" + CUST.CLIMM.txtRecCount
+						sv_d = urhk_SetOrbOut(sv_c)
+						print(sv_d)
+						
+						sv_c = urhk_SetOrbOut("SuccessOrFailure|Y")
+						print(sv_c)
+				
+                #}
+				ENDIF
+		#}
+		ELSE
+		#{
+				CUST.CLIMM.errMsg = CUST.CLIMM.errMsg	+ "Data Not Found"
+				CUST.CLIMM.isError = "Y"
+				GOTO ENDOFSCRIPT
+		#}
+		ENDIF
+	#}
+	ELSE
+	#{
+			 BANCS.OUTPUT.successOrFailure = "F"
+			 sv_u = urhk_SetOrbErr("RESULT_MSG|Nothing To Verify")
+
+	#}
+	ENDIF
+	#}
+	else
+	#{
+		BANCS.OUTPUT.successOrFailure = "F"
+		sv_u = urhk_SetOrbErr("RESULT_MSG|Nothing To Modify")
+	#}
+	endif
+#}
+endif
+	
+IF (CUST.CLIMM.funcCode=="X") THEN
+#{	
+		sv_q = "txtrecCount|"
+		sv_q = sv_q + "select count(*) from CUSTOM.CIMM_COVER_MOD "
+		sv_q = sv_q + " where ins_id = '" +CUST.CLIMM.insId+ "' "
+		#sv_q = sv_q + " and del_flg = 'N' " 
+		PRINT(sv_q)
+	
+		sv_z = urhk_dbSelectWithBind(sv_q)
+		print(sv_z)
+		
+		IF (sv_z == 0) THEN
+		#{
+			sv_x = 1
+			CUST.CLIMM.txtrecCount = BANCS.OUTPARAM.txtrecCount
+			print(CUST.CLIMM.txtrecCount)
+			
+			IF(CUST.CLIMM.txtrecCount != "0") THEN
+			#{
+				sv_r = "insId,insCover2| "
+				sv_r = sv_r + "select ins_id,cover_flg "
+				sv_r = sv_r + "from  CUSTOM.CIMM_COVER_MOD where ins_id='" + CUST.CLIMM.insId + "' "
+				#sv_r = sv_r + "  and del_flg = 'N' "
+				sv_r = sv_r + " and ins_id= '" +CUST.CLIMM.insId+ "' "
+				print(sv_r)
+				
+				sv_z = urhk_dbCursorOpenWithBind(sv_r)
+                PRINT(sv_z)
+				IF(sv_z == 0) THEN
+                #{
+						CUST.CLIMM.txtRecCount = 0
+                        sv_e = BANCS.OUTPARAM.DB_CURSOR_NUMBER
+                        sv_c = urhk_dbCursorFetch(sv_e)
+						print(sv_c)
+
+                    WHILE(sv_c == 0)
+					#{
+						CUST.CLIMM.insCover2    = 	CUST.CLIMM.insCover2    + "!" +	BANCS.OUTPARAM.insCover2
+						CUST.CLIMM.insId  = 	CUST.CLIMM.insId  + "!" +	BANCS.OUTPARAM.insId
+						#CUST.CLIMM.selectVal  = 	CUST.CLIMM.selectVal  + "!" +	BANCS.OUTPARAM.selectVal
+	
+						CUST.CLIMM.txtRecCount = CINT(CUST.CLIMM.txtRecCount) + 1
+						sv_c = urhk_dbCursorFetch(sv_e)	
+						
+					#}
+					DO
+					sv_u = urhk_dbCursorClose(sv_e)
+		
+					IF(CUST.CLIMM.isFailed == "Y") THEN
+					#{
+						sv_u = urhk_SetOrbOut("Error|Y")
+						sv_c = "Error_1|ERROR^" + CUST.CLIMM.errMsg
+						sv_u = urhk_SetOrbOut(sv_c)
+						sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+						#}
+					ELSE
+						#{
+						print(CUST.CLIMM.insCover2)
+						sv_c = "insCover2|" + CUST.CLIMM.insCover2
+						sv_d = urhk_SetOrbOut(sv_c)
+						print(sv_d)
+	
+						sv_c = "insId|" + CUST.CLIMM.insId
+						sv_d = urhk_SetOrbOut(sv_c)
+						print(sv_d)
+	
+						#sv_c = "selectVal|" + CUST.CLIMM.selectVal
+						#sv_d = urhk_SetOrbOut(sv_c)
+						#print(sv_d)
+	
+						sv_c = "txtRecCount|" + CUST.CLIMM.txtRecCount
+						sv_d = urhk_SetOrbOut(sv_c)
+						print(sv_d)
+						
+						sv_c = urhk_SetOrbOut("SuccessOrFailure|Y")
+						print(sv_c)
+				
+                #}
+				ENDIF
+		#}
+		ELSE
+		#{
+				CUST.CLIMM.errMsg = CUST.CLIMM.errMsg	+ "Data Not Found"
+				CUST.CLIMM.isError = "Y"
+				GOTO ENDOFSCRIPT
+		#}
+		ENDIF
+	#}
+	ELSE
+	#{
+			 BANCS.OUTPUT.successOrFailure = "F"
+			 sv_u = urhk_SetOrbErr("RESULT_MSG|Nothing To Cancel")
+
+	#}
+	ENDIF
+	else
+	#{
+		BANCS.OUTPUT.successOrFailure = "F"
+		sv_u = urhk_SetOrbErr("RESULT_MSG|Nothing To Modify")
+	#}
+	endif
+#}
+endif
+	
+	IF (CUST.CLIMM.funcCode=="D") THEN
+	#{	
+		sv_q = "txtrecCount|"
+		sv_q = sv_q + "select count(*) from CUSTOM.CIMM_COVER "
+		sv_q = sv_q + " where ins_id = '" +CUST.CLIMM.insId+ "' "
+		sv_q = sv_q + " and del_flg = 'N' " 
+		PRINT(sv_q)
+	
+		sv_z = urhk_dbSelectWithBind(sv_q)
+		print(sv_z)
+		
+		IF (sv_z == 0) THEN
+		#{
+			sv_x = 1
+			CUST.CLIMM.txtrecCount = BANCS.OUTPARAM.txtrecCount
+			print(CUST.CLIMM.txtrecCount)
+			
+			IF(CUST.CLIMM.txtrecCount != "0") THEN
+			#{
+				sv_r = "insId,insCover2| "
+				sv_r = sv_r + "select ins_id,cover_flg "
+				sv_r = sv_r + "from  custom.CIMM_COVER where ins_id='" + CUST.CLIMM.insId + "' "
+				sv_r = sv_r + "  and del_flg = 'N' "
+				sv_r = sv_r + " and ins_id= '" +CUST.CLIMM.insId+ "' "
+				print(sv_r)
+				
+				sv_z = urhk_dbCursorOpenWithBind(sv_r)
+                PRINT(sv_z)
+				IF(sv_z == 0) THEN
+                #{
+						CUST.CLIMM.txtRecCount = 0
+                        sv_e = BANCS.OUTPARAM.DB_CURSOR_NUMBER
+                        sv_c = urhk_dbCursorFetch(sv_e)
+						print(sv_c)
+
+                    WHILE(sv_c == 0)
+					#{
+						CUST.CLIMM.insCover2    = 	CUST.CLIMM.insCover2    + "!" +	BANCS.OUTPARAM.insCover2
+						CUST.CLIMM.insId  = 	CUST.CLIMM.insId  + "!" +	BANCS.OUTPARAM.insId
+						#CUST.CLIMM.selectVal  = 	CUST.CLIMM.selectVal  + "!" +	BANCS.OUTPARAM.selectVal
+	
+						CUST.CLIMM.txtRecCount = CINT(CUST.CLIMM.txtRecCount) + 1
+						sv_c = urhk_dbCursorFetch(sv_e)	
+						
+					#}
+					DO
+					sv_u = urhk_dbCursorClose(sv_e)
+		
+					IF(CUST.CLIMM.isFailed == "Y") THEN
+					#{
+						sv_u = urhk_SetOrbOut("Error|Y")
+						sv_c = "Error_1|ERROR^" + CUST.CLIMM.errMsg
+						sv_u = urhk_SetOrbOut(sv_c)
+						sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+						#}
+					ELSE
+						#{
+						print(CUST.CLIMM.insCover2)
+						sv_c = "insCover2|" + CUST.CLIMM.insCover2
+						sv_d = urhk_SetOrbOut(sv_c)
+						print(sv_d)
+	
+						sv_c = "insId|" + CUST.CLIMM.insId
+						sv_d = urhk_SetOrbOut(sv_c)
+						print(sv_d)
+	
+						#sv_c = "selectVal|" + CUST.CLIMM.selectVal
+						#sv_d = urhk_SetOrbOut(sv_c)
+						#print(sv_d)
+	
+						sv_c = "txtRecCount|" + CUST.CLIMM.txtRecCount
+						sv_d = urhk_SetOrbOut(sv_c)
+						print(sv_d)
+						
+						sv_c = urhk_SetOrbOut("SuccessOrFailure|Y")
+						print(sv_c)
+				
+                #}
+				ENDIF
+		#}
+		ELSE
+		#{
+				CUST.CLIMM.errMsg = CUST.CLIMM.errMsg	+ "Data Not Found"
+				CUST.CLIMM.isError = "Y"
+				GOTO ENDOFSCRIPT
+		#}
+		ENDIF
+	#}
+	ELSE
+	#{
+			 BANCS.OUTPUT.successOrFailure = "F"
+			 sv_u = urhk_SetOrbErr("RESULT_MSG|Nothing To Delete")
+
+	#}
+	ENDIF
+	else
+	#{
+		BANCS.OUTPUT.successOrFailure = "F"
+		sv_u = urhk_SetOrbErr("RESULT_MSG|Nothing To Modify")
+	#}
+	endif
+#}
+endif
+
+IF (CUST.CLIMM.funcCode=="I") THEN
+	#{	
+		sv_q = "txtrecCount|"
+		sv_q = sv_q + "select count(*) from CUSTOM.CIMM_COVER "
+		sv_q = sv_q + " where ins_id = '" +CUST.CLIMM.insId+ "' "
+		sv_q = sv_q + " and del_flg = 'N' " 
+		PRINT(sv_q)
+	
+		sv_z = urhk_dbSelectWithBind(sv_q)
+		print(sv_z)
+		
+		IF (sv_z == 0) THEN
+		#{
+			sv_x = 1
+			CUST.CLIMM.txtrecCount = BANCS.OUTPARAM.txtrecCount
+			print(CUST.CLIMM.txtrecCount)
+			
+			IF(CUST.CLIMM.txtrecCount != "0") THEN
+			#{
+				sv_r = "insId,insCover2| "
+				sv_r = sv_r + "select ins_id,cover_flg "
+				sv_r = sv_r + "from  custom.CIMM_COVER where ins_id='" + CUST.CLIMM.insId + "' "
+				sv_r = sv_r + "  and del_flg = 'N' "
+				sv_r = sv_r + " and ins_id= '" +CUST.CLIMM.insId+ "' "
+				print(sv_r)
+				
+				sv_z = urhk_dbCursorOpenWithBind(sv_r)
+                PRINT(sv_z)
+				IF(sv_z == 0) THEN
+                #{
+						CUST.CLIMM.txtRecCount = 0
+                        sv_e = BANCS.OUTPARAM.DB_CURSOR_NUMBER
+                        sv_c = urhk_dbCursorFetch(sv_e)
+						print(sv_c)
+
+                    WHILE(sv_c == 0)
+					#{
+						CUST.CLIMM.insCover2    = 	CUST.CLIMM.insCover2    + "!" +	BANCS.OUTPARAM.insCover2
+						CUST.CLIMM.insId  = 	CUST.CLIMM.insId  + "!" +	BANCS.OUTPARAM.insId
+						#CUST.CLIMM.selectVal  = 	CUST.CLIMM.selectVal  + "!" +	BANCS.OUTPARAM.selectVal
+	
+						CUST.CLIMM.txtRecCount = CINT(CUST.CLIMM.txtRecCount) + 1
+						sv_c = urhk_dbCursorFetch(sv_e)	
+						
+					#}
+					DO
+					sv_u = urhk_dbCursorClose(sv_e)
+		
+					IF(CUST.CLIMM.isFailed == "Y") THEN
+					#{
+						sv_u = urhk_SetOrbOut("Error|Y")
+						sv_c = "Error_1|ERROR^" + CUST.CLIMM.errMsg
+						sv_u = urhk_SetOrbOut(sv_c)
+						sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+						#}
+					ELSE
+						#{
+						print(CUST.CLIMM.insCover2)
+						sv_c = "insCover2|" + CUST.CLIMM.insCover2
+						sv_d = urhk_SetOrbOut(sv_c)
+						print(sv_d)
+	
+						sv_c = "insId|" + CUST.CLIMM.insId
+						sv_d = urhk_SetOrbOut(sv_c)
+						print(sv_d)
+	
+						#sv_c = "selectVal|" + CUST.CLIMM.selectVal
+						#sv_d = urhk_SetOrbOut(sv_c)
+						#print(sv_d)
+	
+						sv_c = "txtRecCount|" + CUST.CLIMM.txtRecCount
+						sv_d = urhk_SetOrbOut(sv_c)
+						print(sv_d)
+						
+						sv_c = urhk_SetOrbOut("SuccessOrFailure|Y")
+						print(sv_c)
+				
+                #}
+				ENDIF
+		#}
+		ELSE
+		#{
+				CUST.CLIMM.errMsg = CUST.CLIMM.errMsg	+ "Data Not Found"
+				CUST.CLIMM.isError = "Y"
+				GOTO ENDOFSCRIPT
+		#}
+		ENDIF
+	#}
+	ELSE
+	#{
+			 BANCS.OUTPUT.successOrFailure = "F"
+			 sv_u = urhk_SetOrbErr("RESULT_MSG|Nothing To Delete")
+
+	#}
+	ENDIF
+	else
+	#{
+		BANCS.OUTPUT.successOrFailure = "F"
+		sv_u = urhk_SetOrbErr("RESULT_MSG|Nothing To Modify")
+	#}
+	endif
+#}
+endif
+	print(CUST.CLIMM.errMsg)
+	
+	EXITSCRIPT
+		TRACE OFF
+END-->
+		

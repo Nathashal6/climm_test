@@ -1,0 +1,213 @@
+<--start
+trace on
+
+###################################################################
+	################### CREATE REPOSITORIES AND PRINT #################
+	###################################################################
+
+		if (repexists("CUST") == 0) then
+				createrep("CUST")
+		endif
+
+		if (classexists("CUST", "CLIMM") == 0) then
+				createclass("CUST", "CLIMM", 5)
+		endif
+
+
+	lv_r = urhk_b2k_printRepos("BANCS")
+	print(lv_r)
+
+	###################################################################
+	################### Fetching field values from frontend ###########
+	###################################################################
+
+	CUST.CLIMM.funcCode = BANCS.INPUT.funcCode
+	print(CUST.CLIMM.funcCode)
+	
+	CUST.CLIMM.cifId = BANCS.INPUT.cifId
+	print(CUST.CLIMM.cifId)
+	
+	CUST.CLIMM.assetId = BANCS.INPUT.assetId
+	print(CUST.CLIMM.assetId)
+	
+	CUST.CLIMM.insId = BANCS.INPUT.insId
+	print(CUST.CLIMM.insId)
+	
+	CUST.CLIMM.insProvider = BANCS.INPUT.insProvider
+	print(CUST.CLIMM.insProvider)
+	
+	CUST.CLIMM.assetGrpId = BANCS.INPUT.assetGrpId
+	print(CUST.CLIMM.assetGrpId)
+	
+
+IF (CUST.CLIMM.funcCode=="A") THEN
+#{	
+
+	sv_s = "recCount1| select count(*) from custom.c_ls_lam where asset_id='" + CUST.CLIMM.assetGrpId + "' "
+	print(sv_s)
+	
+	sv_b = urhk_dbSelectWithBind(sv_s)
+	print(sv_b)
+	if(sv_b==0) then
+	#{
+		CUST.CLIMM.recCount1 = BANCS.OUTPARAM.recCount1
+		print(CUST.CLIMM.recCount1)
+	#}
+	endif
+	if(CUST.CLIMM.recCount1 == 0) then
+	#{
+		sv_s = "recCount| select count(*) from custom.cimm_tbl,custom.lagm "
+		sv_s = sv_s + "where cimm_tbl.asset_id = '" +CUST.CLIMM.assetId+ "' and cif_id= '" + CUST.CLIMM.cifId + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' "
+		sv_s = sv_s + "and cimm_tbl.del_flg = 'N' and lagm.del_flg='N' and cimm_tbl.entity_cre_flg = 'Y' and lagm.entity_cre_flg = 'Y' and lagm.asst_group_id=cimm_tbl.asset_grp_id "
+	
+		sv_b = urhk_dbSelectWithBind(sv_s)
+		print(sv_b)
+		if(sv_b==0) then
+		#{
+			CUST.CLIMM.recCount = BANCS.OUTPARAM.recCount
+			print(CUST.CLIMM.recCount)
+		#}
+		endif
+	
+		if(CUST.CLIMM.recCount == 0) then
+		#{
+	
+			sv_q = "countData|"
+			sv_q = sv_q + "select count(*) from custom.LAGM"
+			sv_q = sv_q + " where asset_id = '" +CUST.CLIMM.assetId+ "' and asst_group_id='" + CUST.CLIMM.assetGrpId + "' and del_flg = 'N' " 
+			sv_q = sv_q +" and entity_cre_flg ='Y' "
+			PRINT(sv_q)
+		
+			sv_z = urhk_dbSelectWithBind(sv_q)
+			print(sv_z)
+			
+			IF (sv_z == 0) THEN
+			#{
+	
+				CUST.CLIMM.countData = BANCS.OUTPARAM.countData
+				print(CUST.CLIMM.countData)
+				
+				IF (CUST.CLIMM.countData != "0") THEN
+				#{
+					sv_r = "assetValue|"
+					sv_r = sv_r + "select distinct unit_price "
+					sv_r = sv_r + "from custom.LAGM where asset_id = '" +CUST.CLIMM.assetId+ "' and asst_group_id='" + CUST.CLIMM.assetGrpId + "' "
+					sv_r = sv_r + "  and del_flg = 'N' and entity_cre_flg = 'Y'"
+					print(sv_r)
+					
+					sv_z = urhk_dbSelectWithBind(sv_r)
+					print(sv_z)
+					
+					IF (sv_z==0) THEN 
+					#{
+				
+						CUST.CLIMM.assetValue = BANCS.OUTPARAM.assetValue
+						print(CUST.CLIMM.assetValue)
+						
+						lv_b=urhk_SetOrbOut("SuccessOrFailure|Y")
+						
+						sv_c = "assetValue|" + CUST.CLIMM.assetValue
+						sv_y = urhk_SetOrbOut(sv_c)
+						print(sv_y)
+						
+						#Get Incurance Covers info
+						sv_a = ""
+						sv_a =  sv_a + "coverType|select variable_value "
+						sv_a =  sv_a + "from custom.cust_setvar_maint "
+						sv_a =  sv_a + "where module_name ='INSURANCE' "
+						sv_a =  sv_a + "and sub_module_name = 'COVERTYPE' "
+						sv_a =  sv_a + "and type='TEXT'"
+						print(sv_a)
+						
+						sv_b = urhk_dbCursorOpenWithBind(sv_a)
+						PRINT(sv_b)
+						
+						IF(sv_b != 0) THEN
+						#{
+							CUST.CLIMM.isFailed = "Y"
+							CUST.CLIMM.errMsg = "Insuracne Policy Data no Found"
+							GOTO ENDOFSCRIPT
+						#}
+						ENDIF
+						
+						CUST.CLIMM.policyDescA= ""
+						CUST.CLIMM.txtRecCount = 0
+						sv_e = BANCS.OUTPARAM.DB_CURSOR_NUMBER
+						sv_c = urhk_dbCursorFetch(sv_e)
+						print(sv_c)
+						
+						WHILE(sv_c == 0)
+						#{
+							CUST.CLIMM.policyDescA = CUST.CLIMM.policyDescA + "!" + BANCS.OUTPARAM.coverType   
+							
+							sv_c = urhk_dbCursorFetch(sv_e)
+						#}
+						DO
+						
+						sv_u = urhk_dbCursorClose(sv_e)
+						
+						PRINT(CUST.CLIMM.policyDescA)
+						sv_c = "policyDescA|" + CUST.CLIMM.policyDescA
+						sv_y = urhk_SetOrbOut(sv_c)
+						print(sv_y)
+						
+						#sv_a = "SuccessOrFailure|Y"
+						#sv_b = urhk_SetOrbOut(sv_a)
+						#print(sv_b)
+						
+						GOTO ENDOFSCRIPT
+						
+					#}
+					ELSE
+					#{
+						lv_b = urhk_SetOrbErr("Query Execution Failed")
+						lv_b=urhk_SetOrbOut("SuccessOrFailure|N")
+						GOTO ENDOFSCRIPT
+					#}
+					ENDIF
+			#}
+			ELSE
+			#{
+					lv_b = urhk_SetOrbErr("Asset Details Invalid")
+					lv_b=urhk_SetOrbOut("SuccessOrFailure|N")
+					GOTO ENDOFSCRIPT
+			#}
+			ENDIF	
+		#}
+		ELSE
+		#{
+			lv_b = urhk_SetOrbErr("Query Execution Failed")
+			lv_b=urhk_SetOrbOut("SuccessOrFailure|N")
+			GOTO ENDOFSCRIPT
+		#}
+		ENDIF
+			
+		#}
+		else
+		#{
+			BANCS.OUTPUT.successOrFailure = "F"
+			sv_u = urhk_SetOrbErr("RESULT_MSG|Insuarance Module already exists for the given input")
+			sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+			GOTO ENDOFSCRIPT
+	#}
+	endif
+	#}
+	else
+	#{
+		BANCS.OUTPUT.successOrFailure = "F"
+		sv_u = urhk_SetOrbErr("RESULT_MSG|Account already exists for the Asset Group Id")
+		sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+		GOTO ENDOFSCRIPT
+	#}
+	endif
+#}
+ENDIF	
+
+
+ENDOFSCRIPT:
+	
+trace off
+end-->
+
+
+
