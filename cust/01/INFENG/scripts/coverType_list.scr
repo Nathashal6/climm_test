@@ -30,6 +30,7 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 	CUST.CLIMM.errMsg = ""
 	CUST.CLIMM.successMsg = ""
 	CUST.CLIMM.insCover2 = ""
+	CUST.CLIMM.coverType = ""
 	CUST.CLIMM.isFailed = ""
 
 	sv_s = urhk_B2k_printRepos("BANCS")
@@ -37,6 +38,8 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 
 	CUST.CLIMM.insId = BANCS.INPUT.insId
 	print(CUST.CLIMM.insId)
+	CUST.CLIMM.funcCode = BANCS.INPUT.funcCode
+	print(CUST.CLIMM.funcCode)
 
 	
 	IF (CUST.CLIMM.funcCode=="M") THEN
@@ -58,13 +61,12 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 			
 			IF(CUST.CLIMM.txtrecCount != "0") THEN
 			#{
-				sv_r = "insId,insCover2 | "
-				sv_r = sv_r + "select ins_id,cover_flg "
-				sv_r = sv_r + "from  CUSTOM.CIMM_COVER_MOD where ins_id='" + CUST.CLIMM.insId + "' "
-				#sv_r = sv_r + "  and del_flg = 'N' "
-				sv_r = sv_r + " and ins_id= '" +CUST.CLIMM.insId+ "' "
+				sv_r = "insId,insCover2,coverType| "
+				sv_r = sv_r + "select ins_id,cover_flg,cover_type "
+				sv_r = sv_r + "from  custom.CIMM_COVER_MOD where ins_id='" + CUST.CLIMM.insId + "' "
+				sv_r = sv_r + "  and entity_cre_flg = 'Y' "
+				sv_r = sv_r + " and srl_num=(select max(srl_num) from custom.cimm_cover_mod where ins_id='" + CUST.CLIMM.insId + "' and entity_cre_flg='Y') order by cover_type asc "
 				print(sv_r)
-				
 				sv_z = urhk_dbCursorOpenWithBind(sv_r)
                 PRINT(sv_z)
 				IF(sv_z == 0) THEN
@@ -78,7 +80,7 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 					#{
 						CUST.CLIMM.insCover2    = 	CUST.CLIMM.insCover2    + "!" +	BANCS.OUTPARAM.insCover2
 						CUST.CLIMM.insId  = 	CUST.CLIMM.insId  + "!" +	BANCS.OUTPARAM.insId
-						#CUST.CLIMM.selectVal  = 	CUST.CLIMM.selectVal  + "!" +	BANCS.OUTPARAM.selectVal
+						CUST.CLIMM.coverType  = 	CUST.CLIMM.coverType  + "!" +	BANCS.OUTPARAM.coverType
 	
 						CUST.CLIMM.txtRecCount = CINT(CUST.CLIMM.txtRecCount) + 1
 						sv_c = urhk_dbCursorFetch(sv_e)	
@@ -89,31 +91,31 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 		
 					IF(CUST.CLIMM.isFailed == "Y") THEN
 					#{
-						sv_u = urhk_SetOrbOut("Error|Y")
+						sv_u = urhk_SetOrbOut("Error|Y" + " ")
 						sv_c = "Error_1|ERROR^" + CUST.CLIMM.errMsg
-						sv_u = urhk_SetOrbOut(sv_c)
-						sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+						sv_u = urhk_SetOrbOut(sv_c + " ")
+						sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
 						#}
 					ELSE
 						#{
 						print(CUST.CLIMM.insCover2)
 						sv_c = "insCover2|" + CUST.CLIMM.insCover2
-						sv_d = urhk_SetOrbOut(sv_c)
+						sv_d = urhk_SetOrbOut(sv_c + " ")
 						print(sv_d)
 	
 						sv_c = "insId|" + CUST.CLIMM.insId
-						sv_d = urhk_SetOrbOut(sv_c)
+						sv_d = urhk_SetOrbOut(sv_c + " ")
 						print(sv_d)
 	
-						#sv_c = "selectVal|" + CUST.CLIMM.selectVal
-						#sv_d = urhk_SetOrbOut(sv_c)
-						#print(sv_d)
+						sv_c = "coverType|" + CUST.CLIMM.coverType
+						sv_d = urhk_SetOrbOut(sv_c + " ")
+						print(sv_d)
 	
 						sv_c = "txtRecCount|" + CUST.CLIMM.txtRecCount
-						sv_d = urhk_SetOrbOut(sv_c)
+						sv_d = urhk_SetOrbOut(sv_c + " ")
 						print(sv_d)
 						
-						sv_c = urhk_SetOrbOut("SuccessOrFailure|Y")
+						sv_c = urhk_SetOrbOut("SuccessOrFailure|Y" + " ")
 						print(sv_c)
 				
                 #}
@@ -163,11 +165,11 @@ endif
 			
 			IF(CUST.CLIMM.txtrecCount != "0") THEN
 			#{
-				sv_r = "insId,insCover2| "
-				sv_r = sv_r + "select ins_id,cover_flg "
-				sv_r = sv_r + "from  CUSTOM.CIMM_COVER_MOD where ins_id='" + CUST.CLIMM.insId + "' "
-				#sv_r = sv_r + "  and del_flg = 'N' "
-				sv_r = sv_r + " and ins_id= '" +CUST.CLIMM.insId+ "' "
+				sv_r = "insId,insCover2,coverType| "
+				sv_r = sv_r + "select ins_id,cover_flg,cover_type "
+				sv_r = sv_r + "from  custom.CIMM_COVER_MOD where ins_id='" + CUST.CLIMM.insId + "' "
+				sv_r = sv_r + "  and entity_cre_flg = 'Y' "
+				sv_r = sv_r + " and srl_num=(select max(srl_num) from custom.cimm_cover_mod where ins_id='" + CUST.CLIMM.insId + "' and entity_cre_flg='Y') order by cover_type asc "
 				print(sv_r)
 				
 				sv_z = urhk_dbCursorOpenWithBind(sv_r)
@@ -183,7 +185,7 @@ endif
 					#{
 						CUST.CLIMM.insCover2    = 	CUST.CLIMM.insCover2    + "!" +	BANCS.OUTPARAM.insCover2
 						CUST.CLIMM.insId  = 	CUST.CLIMM.insId  + "!" +	BANCS.OUTPARAM.insId
-						#CUST.CLIMM.selectVal  = 	CUST.CLIMM.selectVal  + "!" +	BANCS.OUTPARAM.selectVal
+						CUST.CLIMM.coverType  = 	CUST.CLIMM.coverType  + "!" +	BANCS.OUTPARAM.coverType
 	
 						CUST.CLIMM.txtRecCount = CINT(CUST.CLIMM.txtRecCount) + 1
 						sv_c = urhk_dbCursorFetch(sv_e)	
@@ -194,31 +196,31 @@ endif
 		
 					IF(CUST.CLIMM.isFailed == "Y") THEN
 					#{
-						sv_u = urhk_SetOrbOut("Error|Y")
+						sv_u = urhk_SetOrbOut("Error|Y" + " ")
 						sv_c = "Error_1|ERROR^" + CUST.CLIMM.errMsg
-						sv_u = urhk_SetOrbOut(sv_c)
-						sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+						sv_u = urhk_SetOrbOut(sv_c + " ")
+						sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
 						#}
 					ELSE
 						#{
 						print(CUST.CLIMM.insCover2)
 						sv_c = "insCover2|" + CUST.CLIMM.insCover2
-						sv_d = urhk_SetOrbOut(sv_c)
+						sv_d = urhk_SetOrbOut(sv_c + " ")
 						print(sv_d)
 	
 						sv_c = "insId|" + CUST.CLIMM.insId
-						sv_d = urhk_SetOrbOut(sv_c)
+						sv_d = urhk_SetOrbOut(sv_c + " ")
 						print(sv_d)
 	
-						#sv_c = "selectVal|" + CUST.CLIMM.selectVal
-						#sv_d = urhk_SetOrbOut(sv_c)
-						#print(sv_d)
+						sv_c = "coverType|" + CUST.CLIMM.coverType
+						sv_d = urhk_SetOrbOut(sv_c + " ")
+						print(sv_d)
 	
 						sv_c = "txtRecCount|" + CUST.CLIMM.txtRecCount
-						sv_d = urhk_SetOrbOut(sv_c)
+						sv_d = urhk_SetOrbOut(sv_c + " ")
 						print(sv_d)
 						
-						sv_c = urhk_SetOrbOut("SuccessOrFailure|Y")
+						sv_c = urhk_SetOrbOut("SuccessOrFailure|Y" + " ")
 						print(sv_c)
 				
                 #}
@@ -268,11 +270,11 @@ IF (CUST.CLIMM.funcCode=="X") THEN
 			
 			IF(CUST.CLIMM.txtrecCount != "0") THEN
 			#{
-				sv_r = "insId,insCover2| "
-				sv_r = sv_r + "select ins_id,cover_flg "
-				sv_r = sv_r + "from  CUSTOM.CIMM_COVER_MOD where ins_id='" + CUST.CLIMM.insId + "' "
-				#sv_r = sv_r + "  and del_flg = 'N' "
-				sv_r = sv_r + " and ins_id= '" +CUST.CLIMM.insId+ "' "
+				sv_r = "insId,insCover2,coverType| "
+				sv_r = sv_r + "select ins_id,cover_flg,cover_type "
+				sv_r = sv_r + "from  custom.CIMM_COVER_mod where ins_id='" + CUST.CLIMM.insId + "' "
+				sv_r = sv_r + "  and entity_cre_flg = 'Y' "
+				sv_r = sv_r + " and srl_num=(select max(srl_num) from custom.cimm_cover_MOD where ins_id='" + CUST.CLIMM.insId + "' and entity_cre_flg='Y') order by cover_type asc "
 				print(sv_r)
 				
 				sv_z = urhk_dbCursorOpenWithBind(sv_r)
@@ -288,7 +290,7 @@ IF (CUST.CLIMM.funcCode=="X") THEN
 					#{
 						CUST.CLIMM.insCover2    = 	CUST.CLIMM.insCover2    + "!" +	BANCS.OUTPARAM.insCover2
 						CUST.CLIMM.insId  = 	CUST.CLIMM.insId  + "!" +	BANCS.OUTPARAM.insId
-						#CUST.CLIMM.selectVal  = 	CUST.CLIMM.selectVal  + "!" +	BANCS.OUTPARAM.selectVal
+						CUST.CLIMM.coverType  = 	CUST.CLIMM.coverType  + "!" +	BANCS.OUTPARAM.coverType
 	
 						CUST.CLIMM.txtRecCount = CINT(CUST.CLIMM.txtRecCount) + 1
 						sv_c = urhk_dbCursorFetch(sv_e)	
@@ -299,31 +301,31 @@ IF (CUST.CLIMM.funcCode=="X") THEN
 		
 					IF(CUST.CLIMM.isFailed == "Y") THEN
 					#{
-						sv_u = urhk_SetOrbOut("Error|Y")
+						sv_u = urhk_SetOrbOut("Error|Y" + " ")
 						sv_c = "Error_1|ERROR^" + CUST.CLIMM.errMsg
-						sv_u = urhk_SetOrbOut(sv_c)
-						sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+						sv_u = urhk_SetOrbOut(sv_c + " ")
+						sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
 						#}
 					ELSE
 						#{
 						print(CUST.CLIMM.insCover2)
 						sv_c = "insCover2|" + CUST.CLIMM.insCover2
-						sv_d = urhk_SetOrbOut(sv_c)
+						sv_d = urhk_SetOrbOut(sv_c + " ")
 						print(sv_d)
 	
 						sv_c = "insId|" + CUST.CLIMM.insId
-						sv_d = urhk_SetOrbOut(sv_c)
+						sv_d = urhk_SetOrbOut(sv_c + " ")
 						print(sv_d)
 	
-						#sv_c = "selectVal|" + CUST.CLIMM.selectVal
-						#sv_d = urhk_SetOrbOut(sv_c)
-						#print(sv_d)
+						sv_c = "coverType|" + CUST.CLIMM.coverType
+						sv_d = urhk_SetOrbOut(sv_c + " ")
+						print(sv_d)
 	
 						sv_c = "txtRecCount|" + CUST.CLIMM.txtRecCount
-						sv_d = urhk_SetOrbOut(sv_c)
+						sv_d = urhk_SetOrbOut(sv_c + " ")
 						print(sv_d)
 						
-						sv_c = urhk_SetOrbOut("SuccessOrFailure|Y")
+						sv_c = urhk_SetOrbOut("SuccessOrFailure|Y" + " ")
 						print(sv_c)
 				
                 #}
@@ -344,10 +346,11 @@ IF (CUST.CLIMM.funcCode=="X") THEN
 
 	#}
 	ENDIF
+	#}
 	else
 	#{
 		BANCS.OUTPUT.successOrFailure = "F"
-		sv_u = urhk_SetOrbErr("RESULT_MSG|Nothing To Modify")
+		sv_u = urhk_SetOrbErr("RESULT_MSG|Query Execution Failed")
 	#}
 	endif
 #}
@@ -358,7 +361,7 @@ endif
 		sv_q = "txtrecCount|"
 		sv_q = sv_q + "select count(*) from CUSTOM.CIMM_COVER "
 		sv_q = sv_q + " where ins_id = '" +CUST.CLIMM.insId+ "' "
-		sv_q = sv_q + " and del_flg = 'N' " 
+		#sv_q = sv_q + " and srl_num = '+CUST.CLIMM.term+"' " 
 		PRINT(sv_q)
 	
 		sv_z = urhk_dbSelectWithBind(sv_q)
@@ -372,11 +375,11 @@ endif
 			
 			IF(CUST.CLIMM.txtrecCount != "0") THEN
 			#{
-				sv_r = "insId,insCover2| "
-				sv_r = sv_r + "select ins_id,cover_flg "
+				sv_r = "insId,insCover2,coverType| "
+				sv_r = sv_r + "select ins_id,cover_flg,cover_type "
 				sv_r = sv_r + "from  custom.CIMM_COVER where ins_id='" + CUST.CLIMM.insId + "' "
-				sv_r = sv_r + "  and del_flg = 'N' "
-				sv_r = sv_r + " and ins_id= '" +CUST.CLIMM.insId+ "' "
+				sv_r = sv_r + "  and entity_cre_flg = 'Y' "
+				sv_r = sv_r + " and srl_num=(select max(srl_num) from custom.cimm_cover where ins_id='" + CUST.CLIMM.insId + "' and entity_cre_flg='Y') order by cover_type asc"
 				print(sv_r)
 				
 				sv_z = urhk_dbCursorOpenWithBind(sv_r)
@@ -392,7 +395,7 @@ endif
 					#{
 						CUST.CLIMM.insCover2    = 	CUST.CLIMM.insCover2    + "!" +	BANCS.OUTPARAM.insCover2
 						CUST.CLIMM.insId  = 	CUST.CLIMM.insId  + "!" +	BANCS.OUTPARAM.insId
-						#CUST.CLIMM.selectVal  = 	CUST.CLIMM.selectVal  + "!" +	BANCS.OUTPARAM.selectVal
+						CUST.CLIMM.coverType  = 	CUST.CLIMM.coverType  + "!" +	BANCS.OUTPARAM.coverType
 	
 						CUST.CLIMM.txtRecCount = CINT(CUST.CLIMM.txtRecCount) + 1
 						sv_c = urhk_dbCursorFetch(sv_e)	
@@ -403,31 +406,31 @@ endif
 		
 					IF(CUST.CLIMM.isFailed == "Y") THEN
 					#{
-						sv_u = urhk_SetOrbOut("Error|Y")
+						sv_u = urhk_SetOrbOut("Error|Y" + " ")
 						sv_c = "Error_1|ERROR^" + CUST.CLIMM.errMsg
-						sv_u = urhk_SetOrbOut(sv_c)
-						sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+						sv_u = urhk_SetOrbOut(sv_c + " ")
+						sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
 						#}
 					ELSE
 						#{
 						print(CUST.CLIMM.insCover2)
 						sv_c = "insCover2|" + CUST.CLIMM.insCover2
-						sv_d = urhk_SetOrbOut(sv_c)
+						sv_d = urhk_SetOrbOut(sv_c + " ")
 						print(sv_d)
 	
 						sv_c = "insId|" + CUST.CLIMM.insId
-						sv_d = urhk_SetOrbOut(sv_c)
+						sv_d = urhk_SetOrbOut(sv_c + " ")
 						print(sv_d)
 	
-						#sv_c = "selectVal|" + CUST.CLIMM.selectVal
-						#sv_d = urhk_SetOrbOut(sv_c)
-						#print(sv_d)
+						sv_c = "coverType|" + CUST.CLIMM.coverType
+						sv_d = urhk_SetOrbOut(sv_c + " ")
+						print(sv_d)
 	
 						sv_c = "txtRecCount|" + CUST.CLIMM.txtRecCount
-						sv_d = urhk_SetOrbOut(sv_c)
+						sv_d = urhk_SetOrbOut(sv_c + " ")
 						print(sv_d)
 						
-						sv_c = urhk_SetOrbOut("SuccessOrFailure|Y")
+						sv_c = urhk_SetOrbOut("SuccessOrFailure|Y" + " ")
 						print(sv_c)
 				
                 #}
@@ -448,21 +451,23 @@ endif
 
 	#}
 	ENDIF
+	#}
 	else
 	#{
 		BANCS.OUTPUT.successOrFailure = "F"
-		sv_u = urhk_SetOrbErr("RESULT_MSG|Nothing To Modify")
+		sv_u = urhk_SetOrbErr("RESULT_MSG|Nothing To Delete")
 	#}
 	endif
 #}
 endif
+
 
 IF (CUST.CLIMM.funcCode=="I") THEN
 	#{	
 		sv_q = "txtrecCount|"
 		sv_q = sv_q + "select count(*) from CUSTOM.CIMM_COVER "
 		sv_q = sv_q + " where ins_id = '" +CUST.CLIMM.insId+ "' "
-		sv_q = sv_q + " and del_flg = 'N' " 
+		#sv_q = sv_q + " and del_flg = 'N' " 
 		PRINT(sv_q)
 	
 		sv_z = urhk_dbSelectWithBind(sv_q)
@@ -476,11 +481,11 @@ IF (CUST.CLIMM.funcCode=="I") THEN
 			
 			IF(CUST.CLIMM.txtrecCount != "0") THEN
 			#{
-				sv_r = "insId,insCover2| "
-				sv_r = sv_r + "select ins_id,cover_flg "
+				sv_r = "insId,insCover2,coverType| "
+				sv_r = sv_r + "select ins_id,cover_flg,cover_type "
 				sv_r = sv_r + "from  custom.CIMM_COVER where ins_id='" + CUST.CLIMM.insId + "' "
-				sv_r = sv_r + "  and del_flg = 'N' "
-				sv_r = sv_r + " and ins_id= '" +CUST.CLIMM.insId+ "' "
+				sv_r = sv_r + "  and entity_cre_flg = 'Y' "
+				sv_r = sv_r + " and srl_num = '" + CUST.CLIMM.term+"' order by cover_type asc "
 				print(sv_r)
 				
 				sv_z = urhk_dbCursorOpenWithBind(sv_r)
@@ -496,7 +501,7 @@ IF (CUST.CLIMM.funcCode=="I") THEN
 					#{
 						CUST.CLIMM.insCover2    = 	CUST.CLIMM.insCover2    + "!" +	BANCS.OUTPARAM.insCover2
 						CUST.CLIMM.insId  = 	CUST.CLIMM.insId  + "!" +	BANCS.OUTPARAM.insId
-						#CUST.CLIMM.selectVal  = 	CUST.CLIMM.selectVal  + "!" +	BANCS.OUTPARAM.selectVal
+						CUST.CLIMM.coverType  = 	CUST.CLIMM.coverType  + "!" +	BANCS.OUTPARAM.coverType
 	
 						CUST.CLIMM.txtRecCount = CINT(CUST.CLIMM.txtRecCount) + 1
 						sv_c = urhk_dbCursorFetch(sv_e)	
@@ -507,31 +512,31 @@ IF (CUST.CLIMM.funcCode=="I") THEN
 		
 					IF(CUST.CLIMM.isFailed == "Y") THEN
 					#{
-						sv_u = urhk_SetOrbOut("Error|Y")
+						sv_u = urhk_SetOrbOut("Error|Y" + " ")
 						sv_c = "Error_1|ERROR^" + CUST.CLIMM.errMsg
-						sv_u = urhk_SetOrbOut(sv_c)
-						sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+						sv_u = urhk_SetOrbOut(sv_c + " ")
+						sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
 						#}
 					ELSE
 						#{
 						print(CUST.CLIMM.insCover2)
 						sv_c = "insCover2|" + CUST.CLIMM.insCover2
-						sv_d = urhk_SetOrbOut(sv_c)
+						sv_d = urhk_SetOrbOut(sv_c + " ")
 						print(sv_d)
 	
 						sv_c = "insId|" + CUST.CLIMM.insId
-						sv_d = urhk_SetOrbOut(sv_c)
+						sv_d = urhk_SetOrbOut(sv_c + " ")
 						print(sv_d)
 	
-						#sv_c = "selectVal|" + CUST.CLIMM.selectVal
-						#sv_d = urhk_SetOrbOut(sv_c)
-						#print(sv_d)
+						sv_c = "coverType|" + CUST.CLIMM.coverType
+						sv_d = urhk_SetOrbOut(sv_c + " ")
+						print(sv_d)
 	
 						sv_c = "txtRecCount|" + CUST.CLIMM.txtRecCount
-						sv_d = urhk_SetOrbOut(sv_c)
+						sv_d = urhk_SetOrbOut(sv_c + " ")
 						print(sv_d)
 						
-						sv_c = urhk_SetOrbOut("SuccessOrFailure|Y")
+						sv_c = urhk_SetOrbOut("SuccessOrFailure|Y" + " ")
 						print(sv_c)
 				
                 #}
@@ -552,6 +557,7 @@ IF (CUST.CLIMM.funcCode=="I") THEN
 
 	#}
 	ENDIF
+	#}
 	else
 	#{
 		BANCS.OUTPUT.successOrFailure = "F"
@@ -561,7 +567,6 @@ IF (CUST.CLIMM.funcCode=="I") THEN
 #}
 endif
 	print(CUST.CLIMM.errMsg)
-	
 	EXITSCRIPT
 		TRACE OFF
 END-->

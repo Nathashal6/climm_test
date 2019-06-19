@@ -35,6 +35,7 @@
 	var assetGrpId = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".assetGrpId",""))%>';
 	var assetValue = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".assetValue",""))%>';
 	var insProvider = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".insProvider",""))%>';
+	var insProviderTxt = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".insProviderTxt",""))%>';
 	var insId = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".insId",""))%>';
 	var insPolicyNo = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".insPolicyNo",""))%>';
 	var insName = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".insName",""))%>';
@@ -66,10 +67,13 @@
 	var insCover15 = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".insCover15",""))%>';
 	var insCover16 = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".insCover16",""))%>';
 	var policyDescA = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".policyDescA",""))%>';
+	var term = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".term",""))%>';
 	
 </script>
 
 <script language="javascript" src="../Renderer/javascripts/lists/<%=VRPKeys.getFile("showCustId.js",sProfileId)%>" > </script>
+<script language="JavaScript">
+</script>
 
 <script language="JavaScript">
 	printBlock();

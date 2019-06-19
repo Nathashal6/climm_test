@@ -55,11 +55,12 @@ CUST.CLIMM.errMsg = ""
 		CUST.CLIMM.assetGrpId = BANCS.INPUT.assetGrpId
 	endif
 	
-	if(fieldexists(BANCS.INPUT.insProviderSrlNo) ==0) THEN
-		CUST.CLIMM.insName = BANCS.INPUT.insName
+	if(fieldexists(BANCS.INPUT.insName) ==0) THEN
+		CUST.CLIMM.isError = "Y"
+		CUST.CLIMM.errMsg = "Insurance Company Name is Mandatory.^insName"			
+		GOTO ENDOFSCRIPT
 	else
-		CUST.CLIMM.insProviderSrlNo = BANCS.INPUT.insProviderSrlNo
-		CUST.CLIMM.insName = ""
+		CUST.CLIMM.insName = BANCS.INPUT.insName
 	endif
 	
 	if(fieldexists(BANCS.INPUT.policyType) ==0) THEN
@@ -209,350 +210,213 @@ if(CUST.CLIMM.funcCode == "A") then
 		sv_x = 1
 		CUST.CLIMM.txtrecCount2 = BANCS.OUTPARAM.txtrecCount2
 		print(CUST.CLIMM.txtrecCount2)
-		print(CUST.CLIMM.insAmt)
 		
-		sv_a = ""
-		sv_a = sv_a + "valuationAmt|select valuation_amt from custom.lagm,custom.lamm "
-		sv_a = sv_a + "where asset_id = '" +CUST.CLIMM.assetId+ "' and lamm.asst_group_id='" + CUST.CLIMM.assetGrpId + "' "
-		sv_a = sv_a + "  and lagm.del_flg = 'N' and lagm.entity_cre_flg = 'Y' and cif_id='" + CUST.CLIMM.cifId + "' and lagm.asst_group_id=lamm.asst_group_id "
-		print(sv_a)
-		
-		sv_b = urhk_dbSelectWithBind(sv_a)
-		PRINT(sv_b)
+		IF(CUST.CLIMM.txtrecCount2 == "0") THEN
+	#{
+	sv_q = "txtrecCount|"
+	sv_q = sv_q + "select count(*) from CUSTOM.CIMM_TBL "
+	sv_q = sv_q + "where asset_id = '" +CUST.CLIMM.assetId+ "' and cif_id = '" + CUST.CLIMM.cifId + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' "
+	sv_q = sv_q + "and del_flg = 'N' and entity_cre_flg = 'Y' "
+	PRINT(sv_q)
 
-		IF(sv_b==0) then
+	sv_z = urhk_dbSelectWithBind(sv_q)
+	print(sv_z)
+	
+	IF (sv_z == 0) THEN
+	#{
+		sv_x = 1
+		CUST.CLIMM.txtrecCount = BANCS.OUTPARAM.txtrecCount
+		print(CUST.CLIMM.txtrecCount)
+		
+		IF(CUST.CLIMM.txtrecCount == "0") THEN
 		#{
-			CUST.CLIMM.valuationAmt = BANCS.OUTPARAM.valuationAmt
-			print(CUST.CLIMM.valuationAmt)
-
-			if((CUST.CLIMM.insAmt != 0) and (CUST.CLIMM.insAmt != "NaN")) then
+		
+			sv_a = ""
+			sv_a = sv_a + "insId|select "
+			sv_a = sv_a + "CONCAT('I',LPAD(NEXTVAL('custom.insId'),9,'0')) from dual"
+			print(sv_a)
+			
+			sv_b = urhk_dbSelectWithBind(sv_a)
+			print(sv_b)
+			
+			IF(sv_b != 0) THEN
 			#{
-				CUST.CLIMM.insPercentage = cdouble(CUST.CLIMM.insAmt) / cdouble(CUST.CLIMM.valuationAmt)*100.00
-				print(CUST.CLIMM.insPercentage)
-				sv_a = "insPercentage | select round('"+CUST.CLIMM.insPercentage+"',2) from dual"
-				print (sv_a)
-				sv_b = urhk_dbSelectWithBind(sv_a)
-				IF(sv_b==0) then
-				#{
-					CUST.CLIMM.insPercentage = BANCS.OUTPARAM.insPercentage
-					print(CUST.CLIMM.insPercentage)
-				#}
-				endif
-			#}
-			else
-			#{
-				#CUST.CLIMM.insAmt = 0.00
-				CUST.CLIMM.insPercentage = 0.00
-			#}
-			endif
-			sv_s ="min | select to_number(to_char(variable_value,'990.90')) from custom.c_svrsetvar where module_name ='INSURANCE' and sub_module_name ='CIMM' and variable_name ='MIN'"
-			print (sv_s)
-			sv_b = urhk_dbSelectWithBind(sv_s)
-			PRINT(sv_b)
-			IF(sv_b==0) then
-			#{
-				CUST.CLIMM.min = BANCS.OUTPARAM.min
-				print(CUST.CLIMM.min)
-			#}
-			else 
-			#{
-				CUST.CLIMM.min = "0"
+				CUST.CLIMM.isError = "Y"
+				LIN.DATA.errMsg = "Insurance Id generation Failed."			
+				GOTO ENDOFSCRIPT
 			#}
 			ENDIF
-			sv_s ="max | select to_number(to_char(variable_value,'990.90')) from custom.c_svrsetvar where module_name ='INSURANCE' and sub_module_name ='CIMM' and variable_name ='MAX'"
-			print (sv_s)
-			sv_b = urhk_dbSelectWithBind(sv_s)
+			
+			CUST.CLIMM.insId = BANCS.OUTPARAM.insId
+			print(CUST.CLIMM.insId)
+			
+			sv_a = ""
+			sv_a = sv_a + "comission_Val|select variable_value from custom.CIPM_TBL"
+			sv_a = sv_a + " where "
+			sv_a = sv_a + " variable_name ='" +CUST.CLIMM.insName+ "' and module_name='CLIMM' and sub_module_name='COMISSION_VALUE' and del_flg='N' "
+			PRINT(sv_a)
+			
+			sv_b = urhk_dbSelectWithBind(sv_a)
 			PRINT(sv_b)
+	
 			IF(sv_b==0) then
 			#{
-				CUST.CLIMM.max = BANCS.OUTPARAM.max
-				print(CUST.CLIMM.max)
-			#}
-			else
-			#{
-				CUST.CLIMM.max = "0"
-			#}
-			endif
-			
-			print(CUST.CLIMM.insPercentage)
-			print(CUST.CLIMM.max)
-			print(CUST.CLIMM.min)
-			#if(CUST.CLIMM.insPercentage<CUST.CLIMM.max) then
-			##{
-			#	CUST.CLIMM.isError = "Y"
-			#	CUST.CLIMM.errMsg =  "Insurance Amount shoule be between "+CUST.CLIMM.min + "% and "+CUST.CLIMM.max +"%"
-			#	GOTO ENDOFSCRIPT
-			##}
-			#endif
-			#print(CUST.CLIMM.min)
-			#if(CUST.CLIMM.insPercentage>CUST.CLIMM.min) then
-			##{
-			#	CUST.CLIMM.isError = "Y"
-			#	CUST.CLIMM.errMsg =  "Insurance Amount shoule be between "+CUST.CLIMM.min + "% and "+CUST.CLIMM.max +"%"
-			#	GOTO ENDOFSCRIPT
-			##}
-			#endif
-		
-			IF(CUST.CLIMM.txtrecCount2 == "0") THEN
-			#{
-				sv_q = "txtrecCount|"
-				sv_q = sv_q + "select count(*) from CUSTOM.CIMM_TBL "
-				sv_q = sv_q + "where asset_id = '" +CUST.CLIMM.assetId+ "' and cif_id = '" + CUST.CLIMM.cifId + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' "
-				sv_q = sv_q + "and del_flg = 'N' and entity_cre_flg = 'Y' "
-				PRINT(sv_q)
-
-				sv_z = urhk_dbSelectWithBind(sv_q)
-				print(sv_z)
-				
-				IF (sv_z == 0) THEN
-				#{
-					sv_x = 1
-					CUST.CLIMM.txtrecCount = BANCS.OUTPARAM.txtrecCount
-					print(CUST.CLIMM.txtrecCount)
-					
-					IF(CUST.CLIMM.txtrecCount == "0") THEN
-					#{
-					
-						sv_a = ""
-						sv_a = sv_a + "insId|select "
-						sv_a = sv_a + "CONCAT('I',LPAD(NEXTVAL('custom.insId'),9,'0')) from dual"
-						print(sv_a)
-						
-						sv_b = urhk_dbSelectWithBind(sv_a)
-						print(sv_b)
-						
-						IF(sv_b != 0) THEN
-						#{
-							CUST.CLIMM.isError = "Y"
-							LIN.DATA.errMsg = "Insurance Id generation Failed."			
-							GOTO ENDOFSCRIPT
-						#}
-						ENDIF
-						
-						CUST.CLIMM.insId = BANCS.OUTPARAM.insId
-						print(CUST.CLIMM.insId)
-						
-						if(CUST.CLIMM.insName == "") then
-						#{
-							sv_a = ""
-							sv_a = sv_a + "comission_Val,insName|select variable_value,variable_name from custom.CIPM_TBL"
-							sv_a = sv_a + " where "
-							sv_a = sv_a + " ins_srl_num ='" +CUST.CLIMM.insProviderSrlNo+ "' and module_name='CLIMM' and sub_module_name='COMISSION_VALUE' and del_flg='N' "
-							PRINT(sv_a)
-							
-							sv_b = urhk_dbSelectWithBind(sv_a)
-							PRINT(sv_b)
-					
-							IF(sv_b==0) then
-							#{
-								CUST.CLIMM.comission_Val = BANCS.OUTPARAM.comission_Val
-								print(CUST.CLIMM.comission_Val)
-								
-								CUST.CLIMM.insName = BANCS.OUTPARAM.insName
-								print(CUST.CLIMM.insName)
-					
-								CUST.CLIMM.comissionAmt = cdouble(CUST.CLIMM.premiumAmt) * cdouble(CUST.CLIMM.comission_Val)/100.00
-								print(CUST.CLIMM.comissionAmt)
-							#}
-							else
-							#{
-								CUST.CLIMM.isError = "Y"
-								BANCS.OUTPUT.successOrFailure = "F"
-								CUST.CLIMM.errMsg = "Insertion Failed"
-								#sv_u = urhk_SetOrbErr("RESULT_MSG|Insertion Failed")
-								#sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
-								GOTO ENDOFSCRIPT
-							#}
-							endif
-						#}
-						else
-						#{
-							print(CUST.CLIMM.insName)
-						#}
-						endif
-						call("climm_table_add.scr")
-						
-						sv_s = "duplInsCnt|select count(*) from custom.cimm_tbl where upper(ins_policy_no)=upper('" + CUST.CLIMM.insPolicyNo + "') and upper(ins_company)=upper('" + CUST.CLIMM.insName + "') and del_flg='N' and entity_cre_flg='Y' "
-						print(sv_s)
-						sv_r = urhk_dbSelectWithBind(sv_s)
-						print(sv_r)
-						if(sv_r ==0) then
-						#{
-							CUST.CLIMM.duplInsCnt = cint(BANCS.OUTPARAM.duplInsCnt)
-							if(cint(CUST.CLIMM.duplInsCnt) >0) then
-							#{
-								CUST.CLIMM.isError = "Y"
-								BANCS.OUTPUT.successOrFailure = "F"
-								CUST.CLIMM.errMsg = "Duplicate Insurance Number Found"
-								#sv_u = urhk_SetOrbErr("RESULT_MSG|Insertion Failed")
-								#sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
-								GOTO ENDOFSCRIPT
-							#}
-							ENDIF
-						#}
-						ENDIF
-					
-					
-						sv_s = " insert into custom.CIMM_MOD_TBL (ins_id,cif_id,asset_grp_id,asset_id,ins_done_by,ins_policy_no,ins_company,policy_type,policy_start_date,policy_end_date,cover_note_no, "
-						sv_s = sv_s + " cover_note_exp_date,premium_amt,ins_amt,ins_cr_amt,cr_period,comission_amt,entity_cre_flg,del_flg,version_no,status,lchg_user_id,lchg_time,rcre_user_id,rcre_time,srl_num) values( "
-						sv_s = sv_s + " '"+ CUST.CLIMM.insId +"','"+ CUST.CLIMM.cifId +"','"+ CUST.CLIMM.assetGrpId +"','"+ CUST.CLIMM.assetId +"','"+ CUST.CLIMM.insProvider +"','"+ CUST.CLIMM.insPolicyNo +"' , "
-						sv_s = sv_s + " '"+ CUST.CLIMM.insName +"','"+ CUST.CLIMM.policyType +"',to_date('"+ CUST.CLIMM.startDate +"','dd-mm-yyyy'),to_date('"+ CUST.CLIMM.endDate +"','dd-mm-yyyy') , "
-						sv_s = sv_s + " '"+ CUST.CLIMM.noteNo +"',to_date('"+ CUST.CLIMM.expiryDate +"','dd-mm-yyyy'),'"+ CUST.CLIMM.premiumAmt +"', "
-						sv_s = sv_s + " '"+ CUST.CLIMM.insAmt +"','"+ CUST.CLIMM.credAmt +"','"+ CUST.CLIMM.credPeriod +"','"+ CUST.CLIMM.comissionAmt +"','N','N', '1',null,'"+ BANCS.STDIN.userId +"', "
-						sv_s = sv_s + " sysdate,null,null,'"+CUST.CLIMM.srl+"') "
-						
-						print(sv_s)
-						sv_d = urhk_dbsqlWithBind(sv_s)
-						print(sv_d)
-						
-						if(sv_d==0) then
-						#{
-						
-							CUST.CLIMM.mainTblCols = "ins_id!" + CUST.CLIMM.insId
-							CUST.CLIMM.modTblCols = "ins_id!" + CUST.CLIMM.insId
-							CUST.CLIMM.mainTblName = "CUST_INS_MASTER_MAINT"
-							CUST.CLIMM.modTblName = "CUST_INS_MASTER_MAINT_MOD"
-							CUST.CLIMM.auditSolId = BANCS.STDIN.mySolId
-							CUST.CLIMM.entryUser = BANCS.STDIN.userId
-							CUST.CLIMM.menuId = BANCS.STDIN.menuId
-							CUST.CLIMM.tableKey = CUST.CLIMM.insId
-							
-							
-							sv_s = "TmpStr | select custom.c_clsgspm_adtAddFnc('" + CUST.CLIMM.mainTblName + "', "
-							sv_s = sv_s + " '" + CUST.CLIMM.modTblName + "', "
-							sv_s = sv_s + " '" + CUST.CLIMM.mainTblCols + "', "
-							sv_s = sv_s + " '" + CUST.CLIMM.modTblCols + "', "
-							sv_s = sv_s + " '" + CUST.CLIMM.auditRefNum + "', "
-							sv_s = sv_s + " '" + CUST.CLIMM.auditSolId + "', "
-							sv_s = sv_s + " '" + CUST.CLIMM.entryUser + "', "
-							sv_s = sv_s + " '" + CUST.CLIMM.menuId + "', "
-							sv_s = sv_s + " '" + CUST.CLIMM.tableKey + "') from dual "
-							sv_r = urhk_dbSelectWithBind(sv_s)
-							print(sv_r)
-							if(sv_r == 0) then
-							#{
-								CUST.CLIMM.TmpStr = BANCS.OUTPARAM.TmpStr
-							#}
-							else
-							#{
-								CUST.CLIMM.TmpStr = ""
-							#}
-							endif
-							BANCS.OUTPUT.successOrFailure = "S"
-							CUST.CLIMM.successMsg = "Insurance created successfully.Insurance Id is "+CUST.CLIMM.insId
-							#sv_u = urhk_SetOrbOut("RESULT_MSG|"+CUST.CLIMM.successMsg + " ")
-							#sv_u = urhk_SetOrbOut("SuccessOrFailure|Y" + " ")
-							GOTO ENDOFSCRIPT
-						#}
-						else
-						#{
-							CUST.CLIMM.isError = "Y"
-							BANCS.OUTPUT.successOrFailure = "F"
-							CUST.CLIMM.errMsg = "Insertion Failed"
-							#sv_u = urhk_SetOrbErr("RESULT_MSG|"+ CUST.CLIMM.errMsg)
-							#sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
-							
-							GOTO ENDOFSCRIPT
-						#}
-						endif
-						
-						
-					#}
-					else
-					#{
-						CUST.CLIMM.isError = "Y"
-						BANCS.OUTPUT.successOrFailure = "F"
-						CUST.CLIMM.errMsg = "Insurance Module already exists for the combination"
-						#sv_u = urhk_SetOrbErr("RESULT_MSG|" + CUST.CLIMM.errMsg)
-						#sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
-						GOTO ENDOFSCRIPT
-					#}
-					endif
-				#}
-				else
-				#{
-					CUST.CLIMM.isError = "Y"
-					BANCS.OUTPUT.successOrFailure = "F"
-					CUST.CLIMM.errMsg = "Insurance Module already exists for the combination"
-					#sv_u = urhk_SetOrbErr("RESULT_MSG| " + CUST.CLIMM.errMsg)
-					#sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
-					GOTO ENDOFSCRIPT
-
-				#}
-				endif
+				CUST.CLIMM.comission_Val = BANCS.OUTPARAM.comission_Val
+				print(CUST.CLIMM.comission_Val)
+	
+				CUST.CLIMM.comissionAmt = cdouble(CUST.CLIMM.premiumAmt) * cdouble(CUST.CLIMM.comission_Val)/100.00
+				print(CUST.CLIMM.comissionAmt)
 			#}
 			else
 			#{
 				CUST.CLIMM.isError = "Y"
 				BANCS.OUTPUT.successOrFailure = "F"
-				CUST.CLIMM.errMsg = "Verification pending for existing combination"
-				#sv_u = urhk_SetOrbErr("RESULT_MSG|" + CUST.CLIMM.errMsg)
+				CUST.CLIMM.errMsg = "Insertion Failed"
+				#sv_u = urhk_SetOrbErr("RESULT_MSG|Insertion Failed")
 				#sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
 				GOTO ENDOFSCRIPT
 			#}
 			endif
+			
+			call("climm_table_add.scr")
+		
+		
+			sv_s = " insert into custom.CIMM_MOD_TBL (ins_id,cif_id,asset_grp_id,asset_id,ins_done_by,ins_policy_no,ins_company,policy_type,policy_start_date,policy_end_date,cover_note_no, "
+			sv_s = sv_s + " cover_note_exp_date,premium_amt,ins_amt,ins_cr_amt,cr_period,comission_amt,entity_cre_flg,del_flg,version_no,status,lchg_user_id,lchg_time,rcre_user_id,rcre_time,srl_num) values( "
+			sv_s = sv_s + " '"+ CUST.CLIMM.insId +"','"+ CUST.CLIMM.cifId +"','"+ CUST.CLIMM.assetGrpId +"','"+ CUST.CLIMM.assetId +"','"+ CUST.CLIMM.insProvider +"','"+ CUST.CLIMM.insPolicyNo +"' , "
+			sv_s = sv_s + " '"+ CUST.CLIMM.insName +"','"+ CUST.CLIMM.policyType +"',to_date('"+ CUST.CLIMM.startDate +"','dd-mm-yyyy'),to_date('"+ CUST.CLIMM.endDate +"','dd-mm-yyyy') , "
+			sv_s = sv_s + " '"+ CUST.CLIMM.noteNo +"',to_date('"+ CUST.CLIMM.expiryDate +"','dd-mm-yyyy'),'"+ CUST.CLIMM.premiumAmt +"', "
+			sv_s = sv_s + " '"+ CUST.CLIMM.insAmt +"','"+ CUST.CLIMM.credAmt +"','"+ CUST.CLIMM.credPeriod +"','"+ CUST.CLIMM.comissionAmt +"','N','N', '1',null,'"+ BANCS.STDIN.userId +"', "
+			sv_s = sv_s + " sysdate,null,null,'"+CUST.CLIMM.srl+"') "
+			
+			print(sv_s)
+			sv_d = urhk_dbsqlWithBind(sv_s)
+			print(sv_d)
+			
+			if(sv_d==0) then
+			#{
+			
+				CUST.CLIMM.mainTblCols = "ins_id!" + CUST.CLIMM.insId
+				CUST.CLIMM.modTblCols = "ins_id!" + CUST.CLIMM.insId
+				CUST.CLIMM.mainTblName = "CUST_INS_MASTER_MAINT"
+				CUST.CLIMM.modTblName = "CUST_INS_MASTER_MAINT_MOD"
+				CUST.CLIMM.auditSolId = BANCS.STDIN.mySolId
+				CUST.CLIMM.entryUser = BANCS.STDIN.userId
+				CUST.CLIMM.menuId = BANCS.STDIN.menuId
+				CUST.CLIMM.tableKey = CUST.CLIMM.insId
+				
+				
+				sv_s = "TmpStr | select custom.c_clsgspm_adtAddFnc('" + CUST.CLIMM.mainTblName + "', "
+				sv_s = sv_s + " '" + CUST.CLIMM.modTblName + "', "
+				sv_s = sv_s + " '" + CUST.CLIMM.mainTblCols + "', "
+				sv_s = sv_s + " '" + CUST.CLIMM.modTblCols + "', "
+				sv_s = sv_s + " '" + CUST.CLIMM.auditRefNum + "', "
+				sv_s = sv_s + " '" + CUST.CLIMM.auditSolId + "', "
+				sv_s = sv_s + " '" + CUST.CLIMM.entryUser + "', "
+				sv_s = sv_s + " '" + CUST.CLIMM.menuId + "', "
+				sv_s = sv_s + " '" + CUST.CLIMM.tableKey + "') from dual "
+				sv_r = urhk_dbSelectWithBind(sv_s)
+				print(sv_r)
+				if(sv_r == 0) then
+				#{
+					CUST.CLIMM.TmpStr = BANCS.OUTPARAM.TmpStr
+				#}
+				else
+				#{
+					CUST.CLIMM.TmpStr = ""
+				#}
+				endif
+				BANCS.OUTPUT.successOrFailure = "S"
+				CUST.CLIMM.successMsg = "Insurance created successfully.Insurance Id is "+CUST.CLIMM.insId
+				#sv_u = urhk_SetOrbOut("RESULT_MSG|"+CUST.CLIMM.successMsg + " ")
+				#sv_u = urhk_SetOrbOut("SuccessOrFailure|Y" + " ")
+				GOTO ENDOFSCRIPT
+			#}
+			else
+			#{
+				CUST.CLIMM.isError = "Y"
+				BANCS.OUTPUT.successOrFailure = "F"
+				CUST.CLIMM.errMsg = "Insertion Failed"
+				#sv_u = urhk_SetOrbErr("RESULT_MSG|"+ CUST.CLIMM.errMsg)
+				#sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
+				
+				GOTO ENDOFSCRIPT
+			#}
+			endif
+			
+			
 		#}
 		else
 		#{
 			CUST.CLIMM.isError = "Y"
 			BANCS.OUTPUT.successOrFailure = "F"
-			CUST.CLIMM.errMsg = "Query Execution Failed"
+			CUST.CLIMM.errMsg = "Insurance Module already exists for the combination"
 			#sv_u = urhk_SetOrbErr("RESULT_MSG|" + CUST.CLIMM.errMsg)
 			#sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
 			GOTO ENDOFSCRIPT
 		#}
 		endif
-	#}
-	endif
+#}
+else
+#{
+	CUST.CLIMM.isError = "Y"
+	BANCS.OUTPUT.successOrFailure = "F"
+	CUST.CLIMM.errMsg = "Insurance Module already exists for the combination"
+	#sv_u = urhk_SetOrbErr("RESULT_MSG| " + CUST.CLIMM.errMsg)
+	#sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
+	GOTO ENDOFSCRIPT
 
+#}
+endif
+#}
+else
+#{
+	CUST.CLIMM.isError = "Y"
+	BANCS.OUTPUT.successOrFailure = "F"
+	CUST.CLIMM.errMsg = "Verification pending for existing combination"
+	#sv_u = urhk_SetOrbErr("RESULT_MSG|" + CUST.CLIMM.errMsg)
+	#sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
+	GOTO ENDOFSCRIPT
+#}
+endif
+#}
+else
+#{
+	CUST.CLIMM.isError = "Y"
+	BANCS.OUTPUT.successOrFailure = "F"
+	CUST.CLIMM.errMsg = "Query Execution Failed"
+	#sv_u = urhk_SetOrbErr("RESULT_MSG|" + CUST.CLIMM.errMsg)
+	#sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
+	GOTO ENDOFSCRIPT
+#}
+endif
 #}
 endif
 
 if(CUST.CLIMM.funcCode == "M") then
 #{
 
-	sv_s =""
-	sv_s = sv_s + "srl| "
-	sv_s = sv_s + "select max(srl_num) from custom.cimm_mod_tbl where "
-	sv_s = sv_s + "asset_id = '" +CUST.CLIMM.assetId+ "' and cif_id = '" + CUST.CLIMM.cifId + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' "
-	sv_s = sv_s + "and del_flg = 'N' and entity_cre_flg = 'N' and ins_id='" + CUST.CLIMM.insId + "' "
-	
-	print(sv_s)
-	sv_d = urhk_dbselectWithBind(sv_s)
-	print(sv_d)
-	
-	if(sv_d==0) then
-	#{
-		CUST.CLIMM.srl= BANCS.OUTPARAM.srl
-	#}
-	else
-	#{
-		CUST.CLIMM.srl= 0
-	#}
-	endif
-	
-	sv_s = "duplInsCnt|select count(*) from custom.cimm_tbl where upper(ins_policy_no)=upper('" + CUST.CLIMM.insPolicyNo + "') and upper(ins_company)=upper('" + CUST.CLIMM.insName + "') and del_flg='N' and entity_cre_flg='Y' "
-	sv_s = sv_s + " and ins_id <> '"+ CUST.CLIMM.insId +"' "
-	print(sv_s)
-	sv_r = urhk_dbSelectWithBind(sv_s)
-	print(sv_r)
-	if(sv_r ==0) then
-	#{
-		CUST.CLIMM.duplInsCnt = cint(BANCS.OUTPARAM.duplInsCnt)
-		if(cint(CUST.CLIMM.duplInsCnt) >0) then
+		sv_s =""
+		sv_s = sv_s + "srl| "
+		sv_s = sv_s + "select max(srl_num) from custom.cimm_mod_tbl where "
+		sv_s = sv_s + "asset_id = '" +CUST.CLIMM.assetId+ "' and cif_id = '" + CUST.CLIMM.cifId + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' "
+		sv_s = sv_s + "and del_flg = 'N' and entity_cre_flg = 'N' and ins_id='" + CUST.CLIMM.insId + "' "
+		
+		print(sv_s)
+		sv_d = urhk_dbselectWithBind(sv_s)
+		print(sv_d)
+		
+		if(sv_d==0) then
 		#{
-			CUST.CLIMM.isError = "Y"
-			BANCS.OUTPUT.successOrFailure = "F"
-			CUST.CLIMM.errMsg = "Duplicate Insurance Number Found"
-			#sv_u = urhk_SetOrbErr("RESULT_MSG|Insertion Failed")
-			#sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
-			GOTO ENDOFSCRIPT
+			CUST.CLIMM.srl= BANCS.OUTPARAM.srl
 		#}
-		ENDIF
-	#}
-	ENDIF
-	
-	print(CUST.CLIMM.srl)
+		else
+		#{
+			CUST.CLIMM.srl= 0
+		#}
+		endif
+		
+		print(CUST.CLIMM.srl)
 	call("climm_table_modify.scr")
 	
 	print(CUST.CLIMM.insId)
@@ -567,7 +431,7 @@ if(CUST.CLIMM.funcCode == "M") then
 	sv_s = sv_s + "ins_cr_amt = '"+ CUST.CLIMM.credAmt +"' , "
 	sv_s = sv_s + "cr_period = '"+ CUST.CLIMM.credPeriod +"', "
 	sv_s = sv_s + "ins_amt = '"+ CUST.CLIMM.insAmt +"',comission_amt = '"+ CUST.CLIMM.comissionAmt +"' "
-	sv_s = sv_s + "where ins_id = '"+ CUST.CLIMM.insId +"' and cif_id = '"+ CUST.CLIMM.cifId +"' and asset_grp_id = '"+ CUST.CLIMM.assetGrpId +"' and asset_id = '"+  CUST.CLIMM.assetId +"' "
+	sv_s = sv_s + "where ins_id = '"+ CUST.CLIMM.insId +"'and cif_id = '"+ CUST.CLIMM.cifId +"' and asset_grp_id = '"+ CUST.CLIMM.assetGrpId +"' and asset_id = '"+  CUST.CLIMM.assetId +"' "
 	
 	print(sv_s)
 	sv_d = urhk_dbsqlWithBind(sv_s)
@@ -597,26 +461,6 @@ endif
 if(CUST.CLIMM.funcCode=="V") then
 #{
 	call("climm_validation.scr")
-	
-	sv_s = "duplInsCnt|select count(*) from custom.cimm_tbl where upper(ins_policy_no)=upper('" + CUST.CLIMM.insPolicyNo + "') and upper(ins_company)=upper('" + CUST.CLIMM.insName + "') and del_flg='N' and entity_cre_flg='Y' "
-	print(sv_s)
-	sv_r = urhk_dbSelectWithBind(sv_s)
-	print(sv_r)
-	if(sv_r ==0) then
-	#{
-		CUST.CLIMM.duplInsCnt = cint(BANCS.OUTPARAM.duplInsCnt)
-		if(cint(CUST.CLIMM.duplInsCnt) >0) then
-		#{
-			CUST.CLIMM.isError = "Y"
-			BANCS.OUTPUT.successOrFailure = "F"
-			CUST.CLIMM.errMsg = "Duplicate Insurance Number Found"
-			#sv_u = urhk_SetOrbErr("RESULT_MSG|Insertion Failed")
-			#sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
-			GOTO ENDOFSCRIPT
-		#}
-		ENDIF
-	#}
-	ENDIF
 	
 	if(CUST.CLIMM.isError == "Y") then
 	#{
@@ -909,27 +753,6 @@ if(CUST.CLIMM.funcCode == "N") then
 	#}
 	endif
 		
-	sv_s = "duplInsCnt|select count(*) from custom.cimm_tbl where upper(ins_policy_no)=upper('" + CUST.CLIMM.insPolicyNo + "') and upper(ins_company)=upper('" + CUST.CLIMM.insName + "') and del_flg='N' and entity_cre_flg='Y' "
-	sv_s = sv_s + " and ins_id <> '"+ CUST.CLIMM.insId +"' "
-	print(sv_s)
-	sv_r = urhk_dbSelectWithBind(sv_s)
-	print(sv_r)
-	if(sv_r ==0) then
-	#{
-		CUST.CLIMM.duplInsCnt = cint(BANCS.OUTPARAM.duplInsCnt)
-		if(cint(CUST.CLIMM.duplInsCnt) >0) then
-		#{
-			CUST.CLIMM.isError = "Y"
-			BANCS.OUTPUT.successOrFailure = "F"
-			CUST.CLIMM.errMsg = "Duplicate Insurance Number Found"
-			#sv_u = urhk_SetOrbErr("RESULT_MSG|Insertion Failed")
-			#sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
-			GOTO ENDOFSCRIPT
-		#}
-		ENDIF
-	#}
-	ENDIF
-	
 	sv_s = "auditRefNum|select custom.c_ls_adt_Seq.nextval from dual"
 	sv_r = urhk_dbSelectWithBind(sv_s)
 	print(sv_r)

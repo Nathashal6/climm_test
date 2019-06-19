@@ -40,12 +40,35 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 	print(CUST.CLIMM.policyDescA)
 	
 	
+	
 	IF (CUST.CLIMM.funcCode=="A") THEN
 	#{	
 			sv_x = 1
-			CUST.CLIMM.txtRecCount = BANCS.INPUT.insCover2
-			print(CUST.CLIMM.txtRecCount)
-		CUST.CLIMM.covertype = ""
+			CUST.CLIMM.txtRecCount ="0"
+			
+			sv_a = ""
+			sv_a = sv_a + "txtRecCount|select nvl(REGEXP_COUNT('"+CUST.CLIMM.chekValA+"', '!'),0) from dual"
+			print(sv_a)
+			
+			sv_b = urhk_dbSelectWithBind(sv_a)
+			print(sv_b)
+			
+			if(sv_b==0) then
+			#{
+				CUST.CLIMM.txtRecCount = BANCS.OUTPARAM.txtRecCount 
+				CUST.CLIMM.txtRecCount =  cdouble(CUST.CLIMM.txtRecCount) +1
+				print(CUST.CLIMM.txtRecCount)
+			#}
+			else
+			#{
+				CUST.CLIMM.isError = "Y"
+				CUST.CLIMM.errMsg = "Insertion failed for the CLIMM table"
+				GOTO ENDOFSCRIPT
+			#}
+			#}
+			endif
+				CUST.CLIMM.covertype = ""
+		
 		WHILE(sv_x < CUST.CLIMM.txtRecCount)
 		#{
 		sv_q = GETPOSITION(CUST.CLIMM.chekValA,"!")
@@ -56,32 +79,89 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 		
 		sv_q = GETPOSITION(CUST.CLIMM.policyDescA,"!")
 		CUST.CLIMM.policyDesc=  MID$(CUST.CLIMM.policyDescA, 0 ,sv_q - 1)
-		PRINT(CUST.CLIMM.chekVal)
+		PRINT(CUST.CLIMM.policyDesc)
 		CUST.CLIMM.policyDescA = MID$(CUST.CLIMM.policyDescA,sv_q,STRLEN(CUST.CLIMM.policyDescA))
 		PRINT(CUST.CLIMM.policyDescA)
 
-		sv_a = ""
-		sv_a = sv_a + "insert into CUSTOM.CIMM_COVER_MOD "
-		sv_a = sv_a + "values("
-		sv_a = sv_a + "'"+CUST.CLIMM.insId+"',"		
-		sv_a = sv_a + "'"+CUST.CLIMM.policyDesc+"',"	
-		sv_a = sv_a + "'"+CUST.CLIMM.chekVal+"') "
-		print(sv_a)
+		if(fieldexists(BANCS.INPUT.insProviderSrlNo) ==0) THEN
+		#{
+			sv_a = ""
+			sv_a = sv_a + "insert into CUSTOM.CIMM_COVER_MOD "
+			sv_a = sv_a + "values("
+			sv_a = sv_a + "'"+CUST.CLIMM.insId+"',"		
+			sv_a = sv_a + "'"+CUST.CLIMM.policyDesc+"',"	
+			sv_a = sv_a + "'"+CUST.CLIMM.chekVal+"','Y','0') "
+			print(sv_a)
+					
+			sv_b = urhk_dbSqlWithBind(sv_a)
+			print(sv_b)
+			
+			IF(sv_b != 0) THEN
+			#{
+				CUST.CLIMM.isError = "Y"
+				CUST.CLIMM.errMsg = "Insertion failed for the CLIMM table"
+				GOTO ENDOFSCRIPT
+			#}
+			ELSE
+			#{
+				CUST.CLIMM.isError = "N"
+				CUST.CLIMM.errMsg = "Insertion successful for the CLIMM table"
+			#}
+			ENDIF	
+		 #}
+		 else
+		 #{
+			sv_a = ""
+			sv_a = sv_a + "coverType|select variable_value from custom.c_svrsetvar"
+			sv_a = sv_a + " where "
+			sv_a = sv_a + " variable_name='" +CUST.CLIMM.policyDesc+ "' and module_name='INSURANCE' and sub_module_name='COVERTYPE' and del_flg='N' "
+			PRINT(sv_a)
+			
+			sv_b = urhk_dbSelectWithBind(sv_a)
+			PRINT(sv_b)
+	
+			IF(sv_b==0) then
+			#{
+				CUST.CLIMM.coverType = BANCS.OUTPARAM.coverType
+				print(CUST.CLIMM.coverType)
 				
-		sv_b = urhk_dbSqlWithBind(sv_a)
-		print(sv_b)
-		
-		IF(sv_b != 0) THEN
-		#{
-			CUST.CLIMM.isError = "Y"
-			CUST.CLIMM.errMsg = "Insertion failed for the CLIMM table"
-		#}
-		ELSE
-		#{
-			CUST.CLIMM.isError = "N"
-			CUST.CLIMM.errMsg = "Insertion successful for the CLIMM table"
-		#}
-		ENDIF		
+			#}
+			else
+			#{
+				CUST.CLIMM.isError = "Y"
+				BANCS.OUTPUT.successOrFailure = "F"
+				CUST.CLIMM.errMsg = "Query Execution Failed"
+				GOTO ENDOFSCRIPT
+			#}
+			endif
+	
+			sv_a = ""
+			sv_a = sv_a + "insert into CUSTOM.CIMM_COVER_MOD "
+			sv_a = sv_a + "values("
+			sv_a = sv_a + "'"+CUST.CLIMM.insId+"',"		
+			sv_a = sv_a + "'"+CUST.CLIMM.coverType+"',"	
+			sv_a = sv_a + "'"+CUST.CLIMM.chekVal+"','Y','0') "
+			print(sv_a)
+				
+			sv_b = urhk_dbSqlWithBind(sv_a)
+			print(sv_b)
+			
+			IF(sv_b != 0) THEN
+			#{
+				CUST.CLIMM.isError = "Y"
+				CUST.CLIMM.errMsg = "Insertion failed for the CLIMM table"
+				GOTO ENDOFSCRIPT
+			#}
+			ELSE
+			#{
+				CUST.CLIMM.isError = "N"
+				CUST.CLIMM.errMsg = "Insertion successful for the CLIMM table"
+			#}
+			ENDIF	
+		 
+		 
+		 #}
+		 endif
 		
 		CUST.CLIMM.mainTblCols = "ins_id!" + CUST.CLIMM.insId + "^cover_type!" + CUST.CLIMM.policyDesc
 		CUST.CLIMM.modTblCols = "ins_id!" + CUST.CLIMM.insId + "^cover_type!" + CUST.CLIMM.policyDesc

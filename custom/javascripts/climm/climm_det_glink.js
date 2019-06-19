@@ -57,7 +57,7 @@ function printBlock()
 		write('<td class="columnwidth">&nbsp; </td>');
 		write('<td class="textlabel" id="refNumber_label1">' + jspResArr.get("FCLAO026") + '</td>');
 		write('<td class="textfielddisplaylabel"> ');
-		write('<label id="compField">' + insProvider + '</label>');
+		write('<label id="compField">' + insProviderTxt + '</label>');
 		write('</td>');
 		write('</tr>');
 		
@@ -92,18 +92,18 @@ function printBlock()
 			
 			write('<td class="textlabel">' + jspResArr.get("FCLAO028") + '</td>');
 		    write('<td class="textfield">');
-		    write('<input hotKeyId="search1" type="text" class="textfieldfont" name="' + subGroupName + '.insName" id="insName" ' + climmProps.get("insName_ENABLED") + ' style="width: 119px" maxlength="20" onBlur="javascript:return cifValidate(insName);">');
-		    write('<a id="sLnk3" href="javascript:showCifId(document.forms[0].insName,\'\',\'F\',document.forms[0].custName)">');
-			write('<img id="cifSearch" border="0" height="17" hotKeyId="search1" src="../Renderer/images/'+applangcode+'/search_icon.gif">');
+		    write('<input hotKeyId="search1" type="text" class="textfieldfont" name="' + subGroupName + '.insName" id="insName" ' + climmProps.get("insName_ENABLED") + ' style="width: 119px" maxlength="70" onChange="javascript:return fnComissionPopulate(insName);">');
+		    write('<a href="javascript:fnInsCompanyList();">');
+			//write('<img id="insNameImg" border="0" height="17" hotKeyId="search1" src="../Renderer/images/'+applangcode+'/search_icon.gif" width="16">');
+			write('<i class="material-icons" value="search" id="insNameImg"  hotKeyId="search1">&#xE8B6;</i></a>&nbsp;');
 			write('</a>');
-			write('<input name="' + subGroupName + '.custName" id="custName" type="text" readonly enabled class="label">');
 			write('</td>');
-		write('</tr>');
+			write('</tr>');
 		
 		write('<tr>');
 			write('<td class="textlabel">' + jspResArr.get("FCLAO029") + '');
 			write('<td class="textfield" style="width: 189px">');
-			write('<select name="' + subGroupName + '.policyType" id="policyType" ' + climmProps.get("policyType_ENABLED") + '   class="listboxfont" onblur="javascript:return climm_det_ONBLUR1(this);" onChange="javascript:return climm_det_ONCHANGE2(this);">');
+			write('<select name="' + subGroupName + '.policyType" id="policyType" ' + climmProps.get("policyType_ENABLED") + '   class="listboxfont" onChange="javascript:return climm_det_ONCHANGE2(this);">');
 			write('<option value="PERSONAL">' + jspResArr.get("FCLAO050") + '</option>');
 			write('<option value="HIRE">' + jspResArr.get("FCLAO051") + '</option>');
 			write('<option value="FIRE">' + jspResArr.get("FCLAO052") + '</option>');
@@ -117,31 +117,35 @@ function printBlock()
 		write('<tr>');
 			write('<td class="textlabel" style="height: 15px">' + jspResArr.get("FCLAO031") + '</td>');
 			write('<td class="textfield">');
-			write('<input  hotKeyId="calender1"  type="text" class="textfieldfont" fdt="uidate"  mnebl="false" onBlur="javascript:return climm_det_ONBLUR2(this,this,this);" name="' + subGroupName + '.startDate_ui" id="startDate_ui"  style="width: 130px">');
-			write('<a  href="javascript:openDate(document.forms[0].startDate_ui,BODDate)"   id="sLnk2"><img align="absmiddle" alt="Date picker" border="0" height="19"  hotKeyId="calender1" src="../Renderer/images/'+applangcode+'/calender.gif" width="24" class="img" >');
+			write('<input  hotKeyId="startDate_ui"  type="text" class="textfieldfont" fdt="uidate"  mnebl="false" onBlur="javascript:return climm_det_ONBLUR2(this,this,this);" name="' + subGroupName + '.startDate_ui" id="startDate_ui"  style="width: 130px">');
+			write('<a  href="javascript:openDate(document.forms[0].startDate_ui,BODDate)"   id="sLnk2">');
+			//write('<img id="cal1" align="absmiddle" alt="Date picker" border="0" height="19"  hotKeyId="calender1" src="../Renderer/images/'+applangcode+'/calender.gif" width="24" class="img" >');
+			write('<i class="material-icons" value="date_range" id="absmiddle"  hotKeyId="startDate_ui">&#xE8B6;</i></a>&nbsp;');
 			write('</a>');
 		    write('</td>');
 			
 			write('<td class="textlabel" style="height: 15px">' + jspResArr.get("FCLAO032") + '</td>');
 			write('<td class="textfield">');
-			write('<input  hotKeyId="calender2"  type="text" class="textfieldfont" fdt="uidate"  mnebl="false" onBlur="javascript:return climm_det_ONBLUR2(this,this,this);" name="' + subGroupName + '.endDate_ui" id="endDate_ui"  style="width: 130px">');
-			write('<a  href="javascript:openDate(document.forms[0].endDate_ui,BODDate)"   id="sLnk3"><img align="absmiddle" alt="Date picker" border="0" height="19"  hotKeyId="calender2" src="../Renderer/images/'+applangcode+'/calender.gif" width="24" class="img" >');
+			write('<input  hotKeyId="endDate_ui"  type="text" class="textfieldfont" fdt="uidate"  mnebl="false" onBlur="javascript:return climm_det_ONBLUR3(this,this,this);" name="' + subGroupName + '.endDate_ui" id="endDate_ui"  style="width: 130px">');
+			write('<a  href="javascript:openDate(document.forms[0].endDate_ui,BODDate)"   id="sLnk3">');
+			//write('<img id="cal2" align="absmiddle" alt="Date picker" border="0" height="19"  hotKeyId="calender2" src="../Renderer/images/'+applangcode+'/calender.gif" width="24" class="img" >');
+			write('<i class="material-icons" value="date_range" id="absmiddle"  hotKeyId="endDate_ui">&#xE8B6;</i></a>&nbsp;');
 			write('</a>');
 			write('</td>');
 		write('</tr>');
 		
 		write('<tr>');
-			write('<td class="textlabel">' + jspResArr.get("FCLAO033") + '');
-			write('<span style="color :red">*</span>');
-			write('</td>');
+			write('<td class="textlabel">' + jspResArr.get("FCLAO033") + '</td>');
 			write('<td class="textfield">');	
 			write('<input type="text" class="textfieldfont" name="' + subGroupName + '.noteNo" id="noteNo"  fdt="String" ' + climmProps.get("noteNo_ENABLED") + ' style="width: 166px; text-left: right;" maxlength="20">');
 			write('</td>');
 			
 			write('<td class="textlabel" style="height: 15px">' + jspResArr.get("FCLAO034") + '</td>');
 			write('<td class="textfield">');
-			write('<input  hotKeyId="calender3"  type="text" class="textfieldfont" fdt="uidate"  mnebl="false" onBlur="javascript:return climm_det_ONBLUR2(this,this,this);" name="' + subGroupName + '.expiryDate_ui" id="expiryDate_ui"  style="width: 130px">');
-			write('<a  href="javascript:openDate(document.forms[0].expiryDate_ui,BODDate)"   id="sLnk4"><img align="absmiddle" alt="Date picker" border="0" height="19"  hotKeyId="calender3" src="../Renderer/images/'+applangcode+'/calender.gif" width="24" class="img" >');
+			write('<input  hotKeyId="expiryDate_ui"  type="text" class="textfieldfont" fdt="uidate"  mnebl="false" onBlur="javascript:return climm_det_ONBLUR4(this,this,this);" name="' + subGroupName + '.expiryDate_ui" id="expiryDate_ui"  style="width: 130px">');
+			write('<a  href="javascript:openDate(document.forms[0].expiryDate_ui,BODDate)"   id="sLnk4">');
+			//write('<img id="cal3" align="absmiddle" alt="Date picker" border="0" height="19"  hotKeyId="calender3" src="../Renderer/images/'+applangcode+'/calender.gif" width="24" class="img" >');
+			write('<i class="material-icons" value="date_range" id="absmiddle"  hotKeyId="expiryDate_ui">&#xE8B6;</i></a>&nbsp;');
 			write('</a>');
 			write('</td>');
 		write('</tr>');
@@ -151,29 +155,31 @@ function printBlock()
 			write('<span style="color :red">*</span>');
 			write('</td>');
 			write('<td class="textfield">');	
-			write('<input type="text" class="textfieldfont" name="' + subGroupName + '.premiumAmt" id="premiumAmt"  fdt="String" ' + climmProps.get("premiumAmt_ENABLED") + ' style="width: 166px; text-align: right;" maxlength="12" onBlur="javascript:return comissionVal(premiumAmt);">');
+			write('<input type="text" class="textfieldfont" name="' + subGroupName + '.premiumAmt" id="premiumAmt"  fdt="String" ' + climmProps.get("premiumAmt_ENABLED") + ' style="width: 166px; text-align: right;" maxlength="12" onchange="javascript:return comissionVal(this);">');
 			write('</td>');
 			write('<td class="textlabel">' + jspResArr.get("FCLAO039") + '');
 			write('<span style="color :red">*</span>');
 			write('</td>');
 			write('<td class="textfield">');	
-			write('<input type="text" class="textfieldfont" name="' + subGroupName + '.insAmt" id="insAmt"  fdt="String" ' + climmProps.get("insAmt_ENABLED") + ' style="width: 166px; text-align: right;" maxlength="12" onBlur="javascript:return setTSAmount(this);">');
+			write('<input type="text" class="textfieldfont" name="' + subGroupName + '.insAmt" id="insAmt"  fdt="String" ' + climmProps.get("insAmt_ENABLED") + ' style="width: 166px; text-align: right;" maxlength="12" onchange="javascript:return loadPercantage(this);">');
+			write('&nbsp;');
+			//write('<a id="sLnk3" href="javascript:showCifId(document.forms[0].cifId,\'\',\'F\',document.forms[0].custName)">');
+			//write('<img id="cifSearch" border="0" height="17" hotKeyId="search1" src="../Renderer/images/'+applangcode+'/search_icon.gif">');
+			//write('</a>');
+			write('<input name="' + subGroupName + '.insPercentage" id="insPercentage" type="text" readonly enabled class="label">');
 			write('</td>');
 		write('</tr>');
 		
 		write('<tr>');
-			write('<td class="textlabel">' + jspResArr.get("FCLAO036") + '');
-			write('<span style="color :red">*</span>');
-			write('</td>');
+			write('<td class="textlabel">' + jspResArr.get("FCLAO036") + '</td>');
 			write('<td class="textfield">');	
-			write('<input type="text" class="textfieldfont" name="' + subGroupName + '.credAmt" id="credAmt"  fdt="String" ' + climmProps.get("credAmt_ENABLED") + ' style="width: 166px; text-align: right;" maxlength="12" onBlur="javascript:return setTSAmount(this);">');
+			write('<input type="text" class="textfieldfont" name="' + subGroupName + '.credAmt" id="credAmt"  fdt="String" ' + climmProps.get("credAmt_ENABLED") + ' style="width: 166px; text-align: right;" maxlength="12" onchange="javascript:return setTSAmount(this);">');
 			write('</td>');
 			
-			write('<td class="textlabel">' + jspResArr.get("FCLAO038") + '');
+			write('<td class="textlabel">' + jspResArr.get("FCLAO038") + '</td>');
 			write('<span style="color :red">*</span>');
-			write('</td>');
 			write('<td class="textfield">');	
-			write('<input type="text" class="textfieldfont" name="' + subGroupName + '.credPeriod" id="credPeriod"  fdt="String" ' + climmProps.get("credPeriod_ENABLED") + ' style="width: 166px; text-align: right;" maxlength="3" onBlur="javascript:return validateCredPeriod(this);">');
+			write('<input type="text" class="textfieldfont" name="' + subGroupName + '.credPeriod" id="credPeriod"  fdt="String" ' + climmProps.get("credPeriod_ENABLED") + ' style="width: 166px; text-align: right;" maxlength="3" onchange="javascript:return validateCredPeriod(this);">');
 			write('</td>');
 		write('</tr>');
 		
@@ -188,7 +194,7 @@ function printBlock()
 					
 					write('<td class="textlabel">' + jspResArr.get("FCLAO040") + '</td>');
 					write('<td class="textfield">');	
-					write('<input type="text" class="textfieldfont" name="' + subGroupName + '.comissionAmt" id="comissionAmt"  fdt="String" ' + climmProps.get("comissionAmt_ENABLED") + ' style="width: 166px; text-align: right;" maxlength="12" onBlur="javascript:return fnValAmt(comissionAmt);">');
+					write('<input type="text" class="textfieldfont" name="' + subGroupName + '.comissionAmt" id="comissionAmt"  fdt="String" ' + climmProps.get("comissionAmt_ENABLED") + ' style="width: 166px; text-align: right;" maxlength="12" onBlur="javascript:return setTSAmount(this);">');
 					write('</td>');
 					write('<td class="columnwidth">&nbsp; </td>');
 					write('<td class="columnwidth">&nbsp; </td>');
@@ -246,7 +252,7 @@ function printFooterBlock()
 	{
 		if ((sReferralMode == 'I')||(sReferralMode == 'S'))
 		{
-			write('<div align="left" class="ctable">');
+			write('<div align="left" class="ctable custom-buttons button-wrapper-fixed">');
 			if (sReferralMode == 'S')
 			{
 				write('<input type="button" class="Button" id="Submit" value="'+jspResArr.get("FCDET002")+ '" onClick="javascript:return doRefSubmit(this);" hotKeyId="Submit" >');
@@ -259,14 +265,14 @@ function printFooterBlock()
 		{
 			if(funcCode !='I')
 			{
-				write('<div class="ctable">');
-				write('<input id="Submit" name="Submit" type="button" class="button" onClick="javascript:return climm_det_ONCLICK1(this,this);"" value="' + jspResArr.get("FCDET002") + '" hotKeyId="Submit">');
-				//write('<input id="Submit" name="Submit" type="button" class="button" onClick="javascript:return climm_det_ONCLICK2(this,this);"" value="' + jspResArr.get("FCDET003") + '" hotKeyId="Validate">');
-				write('<input id="Cancel" name="Cancel" type="button" class="button" value="' + jspResArr.get("FCDET004") + '"	onClick="javascript:return climm_det_ONCLICK3(this,this.id);"" hotKeyId="Cancel">');
+				write('<div class="ctable custom-buttons button-wrapper-fixed">');
+				write('<input id="Submit" name="Submit" type="button" class="button" onClick="javascript:return climm_det_ONCLICK1(this,this);" value="' + jspResArr.get("FCDET002") + '" hotKeyId="Submit">');
+				//write('<input id="Submit" name="Submit" type="button" class="button" onClick="javascript:return climm_det_ONCLICK2(this,this);" value="' + jspResArr.get("FCDET003") + '" hotKeyId="Validate">');
+				write('<input id="Cancel" name="Cancel" type="button" class="button" value="' + jspResArr.get("FCDET004") + '"	onClick="javascript:return climm_det_ONCLICK3(this,this.id);" hotKeyId="Cancel">');
 			}
 			else
 			{
-				write('<div class="ctable">');
+				write('<div class="ctable custom-buttons button-wrapper-fixed">');
 				write('<input class="button" type="button" id="Back" value="'+jspResArr.get("FCDET014")+ '" onClick="javascript:return doSubmit(this.id)" hotKeyId="Ok">');
 			}
 			writeFooter();
@@ -307,11 +313,6 @@ function fnOnLoad()
 	
 	post_ONLOAD('climm_det',this);
 	//return true;
-}
-
-function fnCheckMandatoryFields()
-{
-	return true;
 }
 
 function fnPopulateControlValues() 
@@ -411,6 +412,46 @@ function climm_det_ONCLICK3(obj,p1)
 
 function climm_det_ONBLUR2(obj,p1,p2)
 {
+	
+	var retVal = "";
+	if (preEventCall('climm_det',obj,'ONBLUR') == false) { 
+		return false;
+	}
+	if ((retVal = onBlurFormatDate(p1)) == false) {
+		return false;
+	}
+	if ((retVal = fnAssignDateOnEnter(p2)) == false) {
+		return false;
+	}
+	if (postEventCall('climm_det',obj,'ONBLUR') == false) { 
+		return false;
+	}
+	endDateValidation();
+	return (retVal == undefined) ? true : retVal;
+}
+
+
+function climm_det_ONBLUR3(obj,p1,p2)
+{
+	var retVal = "";
+	if (preEventCall('climm_det',obj,'ONBLUR') == false) { 
+		return false;
+	}
+	if ((retVal = onBlurFormatDate(p1)) == false) {
+		return false;
+	}
+	if ((retVal = fnAssignDateOnEnter(p2)) == false) {
+		return false;
+	}
+	if (postEventCall('climm_det',obj,'ONBLUR') == false) { 
+		return false;
+	}
+	endDateVal();
+	return (retVal == undefined) ? true : retVal;
+}
+
+function climm_det_ONBLUR4(obj,p1,p2)
+{
 	var retVal = "";
 	if (preEventCall('climm_det',obj,'ONBLUR') == false) { 
 		return false;
@@ -425,23 +466,21 @@ function climm_det_ONBLUR2(obj,p1,p2)
 		return false;
 	}
 	return (retVal == undefined) ? true : retVal;
-	
 }
-
-function climm_det_ONBLUR1(obj)
-{
-	var retVal = "";
-	if (preEventCall('climm_det',obj,'ONBLUR') == false) { 
-		return false;
-	}
-	if ((retVal = fnHandleModRow()) == false) {
-		return false;
-	}
-	if (postEventCall('climm_det',obj,'ONBLUR') == false) { 
-		return false;
-	}
-	return (retVal == undefined) ? true : retVal;
-}
+//function climm_det_ONBLUR1(obj)
+//{
+//	var retVal = "";
+//	if (preEventCall('climm_det',obj,'ONBLUR') == false) { 
+//		return false;
+//	}
+//	if ((retVal = fnHandleModRow()) == false) {
+//		return false;
+//	}
+//	if (postEventCall('climm_det',obj,'ONBLUR') == false) { 
+//		return false;
+//	}
+//	return (retVal == undefined) ? true : retVal;
+//}
 
 function climm_det_ONCHANGE2(obj)
 {

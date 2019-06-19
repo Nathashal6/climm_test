@@ -1,0 +1,404 @@
+<--start
+trace on
+
+###################################################################
+################### CREATE REPOSITORIES AND PRINT #################
+###################################################################
+
+		if (repexists("CUST") == 0) then
+				createrep("CUST")
+		endif
+
+		if (classexists("CUST", "CLIMM") == 0) then
+				createclass("CUST", "CLIMM", 5)
+		endif
+
+
+	lv_r = urhk_b2k_printRepos("BANCS")
+	print(lv_r)
+
+###################################################################
+################### Fetching field values from frontend ###########
+###################################################################
+CUST.CLIMM.cifId = BANCS.INPUT.cifId
+print(CUST.CLIMM.cifId)
+
+CUST.CLIMM.insPolicyNo = BANCS.INPUT.insPolicyNo
+print(CUST.CLIMM.insPolicyNo)
+
+CUST.CLIMM.assetId = BANCS.INPUT.assetId
+print(CUST.CLIMM.assetId)
+
+CUST.CLIMM.assetGrpId = BANCS.INPUT.assetGrpId
+print(CUST.CLIMM.assetGrpId)
+
+CUST.CLIMM.insName = BANCS.INPUT.insName
+print(CUST.CLIMM.insName)
+
+CUST.CLIMM.policyType = BANCS.INPUT.policyType
+print(CUST.CLIMM.policyType)
+
+CUST.CLIMM.startDate = BANCS.INPUT.startDate
+print(CUST.CLIMM.startDate)
+
+CUST.CLIMM.endDate = BANCS.INPUT.endDate
+print(CUST.CLIMM.endDate)
+
+CUST.CLIMM.noteNo = BANCS.INPUT.noteNo
+print(CUST.CLIMM.noteNo)
+
+CUST.CLIMM.expiryDate = BANCS.INPUT.expiryDate
+print(CUST.CLIMM.expiryDate)
+
+CUST.CLIMM.premiumAmt = BANCS.INPUT.premiumAmt
+print(CUST.CLIMM.premiumAmt)
+
+CUST.CLIMM.credAmt = BANCS.INPUT.credAmt
+print(CUST.CLIMM.credAmt)
+
+CUST.CLIMM.capAmt = BANCS.INPUT.capAmt
+print(CUST.CLIMM.capAmt)
+
+CUST.CLIMM.comissionAmt = BANCS.INPUT.comissionAmt
+print(CUST.CLIMM.comissionAmt)
+
+CUST.CLIMM.insAmt = BANCS.INPUT.insAmt
+print(CUST.CLIMM.insAmt)
+
+CUST.CLIMM.credPeriod = BANCS.INPUT.credPeriod
+print(CUST.CLIMM.credPeriod)
+
+CUST.CLIMM.funcCode = BANCS.INPUT.funcCode
+print(CUST.CLIMM.funcCode)
+
+
+CUST.CLIMM.insId = BANCS.INPUT.insId
+print(CUST.CLIMM.insId)
+
+if(CUST.CLIMM.funcCode == "A") then
+#{
+	sv_q = "txtrecCount|"
+	sv_q = sv_q + "select count(*) from CUSTOM.CIMM_TBL "
+	sv_q = sv_q + "where asset_id = '" +CUST.CLIMM.assetId+ "' and cif_id = '" + CUST.CLIMM.cifId + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' "
+	sv_q = sv_q + "and del_flg = 'N' and entity_cre_flg = 'Y' "
+	PRINT(sv_q)
+
+	sv_z = urhk_dbSelectWithBind(sv_q)
+	print(sv_z)
+	
+	IF (sv_z == 0) THEN
+	#{
+		sv_x = 1
+		CUST.CLIMM.txtrecCount = BANCS.OUTPARAM.txtrecCount
+		print(CUST.CLIMM.txtrecCount)
+		
+		IF(CUST.CLIMM.txtrecCount == "0") THEN
+		#{
+		
+			sv_a = ""
+			sv_a = sv_a + "insId|select "
+			sv_a = sv_a + "CONCAT('I',LPAD(NEXTVAL('custom.insId'),9,'0')) from dual"
+			print(sv_a)
+			
+			sv_b = urhk_dbSelectWithBind(sv_a)
+			print(sv_b)
+			
+			IF(sv_b != 0) THEN
+			#{
+				LIN.DATA.isError = "Y"
+				LIN.DATA.errMsg = "Insurance Id generation Failed."			
+				GOTO ENDOFSCRIPT
+			#}
+			ENDIF
+			
+			CUST.CLIMM.insId = BANCS.OUTPARAM.insId
+			print(CUST.CLIMM.insId)
+			
+			call("climm_table_add.scr")
+		
+		
+			sv_s = " insert into custom.CIMM_MOD_TBL (ins_id,cif_id,asset_grp_id,asset_id,ins_done_by,ins_policy_no,ins_company,policy_type,policy_start_date,policy_end_date,cover_note_no, "
+			sv_s = sv_s + " cover_note_exp_date,premium_amt,ins_amt,comission_amt,entity_cre_flg,del_flg,version_no,status,lchg_user_id,lchg_time,rcre_user_id,rcre_time) values( "
+			sv_s = sv_s + " '"+ CUST.CLIMM.insId +"','"+ CUST.CLIMM.cifId +"','"+ CUST.CLIMM.assetGrpId +"','"+ CUST.CLIMM.assetId +"','"+ CUST.CLIMM.insProvider +"','"+ CUST.CLIMM.insPolicyNo +"' , "
+			sv_s = sv_s + " '"+ CUST.CLIMM.insName +"','"+ CUST.CLIMM.policyType +"',to_date('"+ CUST.CLIMM.startDate +"'),to_date('"+ CUST.CLIMM.endDate +"') , "
+			sv_s = sv_s + " '"+ CUST.CLIMM.noteNo +"',to_date('"+ CUST.CLIMM.expiryDate +"'),'"+ CUST.CLIMM.premiumAmt +"', "
+			sv_s = sv_s + " '"+ CUST.CLIMM.insAmt +"','"+ CUST.CLIMM.comissionAmt +"','N','N', '1',null,'"+ BANCS.STDIN.userId +"', "
+			sv_s = sv_s + " sysdate,null,null) "
+			
+			print(sv_s)
+			sv_d = urhk_dbsqlWithBind(sv_s)
+			print(sv_d)
+			
+			if(sv_d==0) then
+			#{
+				BANCS.OUTPUT.successOrFailure = "S"
+				sv_u = urhk_SetOrbOut("RESULT_MSG|Insuarance created succesfully.Insurance Id is "+CUST.CLIMM.insId)
+				sv_u = urhk_SetOrbOut("SuccessOrFailure|Y")
+				GOTO ENDOFSCRIPT
+			#}
+			else
+			#{
+				BANCS.OUTPUT.successOrFailure = "F"
+				sv_u = urhk_SetOrbErr("RESULT_MSG|Insertion Failed")
+				sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+				GOTO ENDOFSCRIPT
+			#}
+			endif
+		#}
+		else
+		#{
+			BANCS.OUTPUT.successOrFailure = "F"
+			sv_u = urhk_SetOrbErr("RESULT_MSG|Inuarance Module already exists for the combination")
+			sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+			GOTO ENDOFSCRIPT
+		#}
+		endif
+#}
+else
+#{
+	BANCS.OUTPUT.successOrFailure = "F"
+	sv_u = urhk_SetOrbErr("RESULT_MSG|Query Execution failed")
+	sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+	GOTO ENDOFSCRIPT
+
+#}
+endif
+
+#}
+endif
+
+if(CUST.CLIMM.funcCode == "M") then
+#{
+
+	call("climm_table_modify.scr")
+	
+	sv_s = "update custom.CIMM_MOD_TBL set "
+	sv_s = sv_s + " ins_id = '"+ CUST.CLIMM.insId +"',cif_id = '"+ CUST.CLIMM.cifId +"',asset_grp_id = '"+ CUST.CLIMM.assetGrpId +"',asset_id = '"+ CUST.CLIMM.assetId +"',ins_done_by = '"+ CUST.CLIMM.insProvider +"', "
+	sv_s = sv_s + " ins_policy_no = '"+ CUST.CLIMM.insPolicyNo +"' , "
+	sv_s = sv_s + "ins_company = '"+ CUST.CLIMM.insName +"',policy_type = '"+ CUST.CLIMM.policyType +"',policy_start_date = to_date('"+ CUST.CLIMM.startDate +"'),policy_end_date = to_date('"+ CUST.CLIMM.endDate +"') , "
+	sv_s = sv_s + "cover_note_no = '"+ CUST.CLIMM.noteNo +"', cover_note_exp_date = to_date('"+ CUST.CLIMM.expiryDate +"'),premium_amt = '"+ CUST.CLIMM.premiumAmt +"', "
+	#sv_s = sv_s + "ins_cr_amt = '"+ CUST.CLIMM.credAmt +"' , "
+	#sv_s = sv_s + "capitalized_amt = '"+ CUST.CLIMM.capAmt +"',cr_period = '"+ CUST.CLIMM.credPeriod +"', "
+	sv_s = sv_s + "ins_amt = '"+ CUST.CLIMM.insAmt +"',comission_amt = '"+ CUST.CLIMM.comissionAmt +"' "
+	
+	print(sv_s)
+	sv_d = urhk_dbsqlWithBind(sv_s)
+	print(sv_d)
+	
+	if(sv_d==0) then
+	#{
+		BANCS.OUTPUT.successOrFailure = "S"
+		sv_u = urhk_SetOrbOut("RESULT_MSG|Insuarance Details Modified succesfully")
+		sv_u = urhk_SetOrbOut("SuccessOrFailure|Y")
+		GOTO ENDOFSCRIPT
+	#}
+	else
+	#{
+		BANCS.OUTPUT.successOrFailure = "F"
+		sv_u = urhk_SetOrbErr("RESULT_MSG|Modification Failed")
+		sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+		GOTO ENDOFSCRIPT
+	#}
+	endif
+#}
+endif
+
+if(CUST.CLIMM.funcCode=="V") then
+#{
+
+	call("climm_table_verify.scr")
+	sv_s = " update custom.CIMM_MOD_TBL set rcre_user_id = '" +BANCS.STDIN.userId +"', " 
+	sv_s = sv_s + "rcre_time = sysdate, entity_cre_flg='Y' "
+	sv_s = sv_s + "where asset_id = '" +CUST.CLIMM.assetId+ "' and ins_id = '" + CUST.CLIMM.insId + "' and ins_done_by= '" + CUST.CLIMM.insProvider + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' "
+	sv_s = sv_s + "and del_flg = 'N' and entity_cre_flg = 'N' "
+	
+	print(sv_s)
+	
+	sv_d = urhk_dbsqlWithBind(sv_s)
+	print(sv_d)
+	
+	if(sv_d==0) then
+	#{
+		sv_r = " insert into custom.CIMM_TBL " 
+		sv_r = sv_r + "select * from custom.CIMM_MOD_TBL  "
+		sv_r = sv_r + "where asset_id = '" +CUST.CLIMM.assetId+ "' and ins_id = '" + CUST.CLIMM.insId + "'"
+		sv_r = sv_r + " and ins_done_by= '" + CUST.CLIMM.insProvider + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' "
+        	sv_r = sv_r + "and del_flg = 'N' and entity_cre_flg = 'Y' "
+
+		
+		print(sv_r)
+	
+	    sv_q = urhk_dbsqlWithBind(sv_r)
+	    print(sv_q)
+		
+		if(sv_q==0) then
+	    #{
+			BANCS.OUTPUT.successOrFailure = "S"
+			sv_u = urhk_SetOrbOut("RESULT_MSG|Insuarance verified succesfully. Insuarance Id: " + CUST.CLIMM.insId)
+			sv_r = "delete from custom.CIMM_MOD_TBL  "
+			sv_r = sv_r + "where asset_id = '" +CUST.CLIMM.assetId+ "' and ins_id = '" + CUST.CLIMM.insId + "'"
+			sv_r = sv_r + " and ins_done_by= '" + CUST.CLIMM.insProvider + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' "
+			sv_r = sv_r + "and del_flg = 'N' and entity_cre_flg = 'Y' "
+			print(sv_r)
+			sv_q = urhk_dbsqlWithBind(sv_r)
+			print(sv_q)
+			if(sv_q==0) then
+			#{
+				sv_u = urhk_SetOrbOut("SuccessOrFailure|Y")
+			#}
+			ELSE
+			#{
+				BANCS.OUTPUT.successOrFailure = "F"
+                        	sv_u = urhk_SetOrbErr("RESULT_MSG|Query Execution Failed")
+                        	sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+                        	GOTO ENDOFSCRIPT
+
+			#}
+			endif
+			sv_u = urhk_SetOrbOut("SuccessOrFailure|Y")
+			GOTO ENDOFSCRIPT
+		#}
+		else
+		#{
+			BANCS.OUTPUT.successOrFailure = "F"
+			sv_u = urhk_SetOrbErr("RESULT_MSG|Query Execution Failed")
+			sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+			GOTO ENDOFSCRIPT
+		#}
+		endif
+	#}
+	else
+	#{
+		BANCS.OUTPUT.successOrFailure = "F"
+		sv_u = urhk_SetOrbErr("RESULT_MSG|Verification Failed")
+		sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+		GOTO ENDOFSCRIPT
+	#}
+	endif
+	
+#}
+endif
+
+if(CUST.CLIMM.funcCode=="D") then
+#{
+
+	call("climm_table_delete.scr")
+	sv_s = " delete custom.CIMM_MOD_TBL "
+	sv_s = sv_s + "where asset_id = '" +CUST.CLIMM.assetId+ "' and ins_id = '" + CUST.CLIMM.insId + "' and ins_done_by= '" + CUST.CLIMM.insProvider + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' "
+	sv_s = sv_s + "and del_flg = 'N' and entity_cre_flg = 'Y' "
+	
+	print(sv_s)
+	
+	sv_d = urhk_dbsqlWithBind(sv_s)
+	print(sv_d)
+	sv_s = " update custom.CIMM_TBL set rcre_user_id = '" +BANCS.STDIN.userId +"', " 
+	sv_s = sv_s + "rcre_time = sysdate, del_flg='Y' "
+	sv_s = sv_s + "where asset_id = '" +CUST.CLIMM.assetId+ "' and ins_id = '" + CUST.CLIMM.insId + "' and ins_done_by= '" + CUST.CLIMM.insProvider + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' "
+	sv_s = sv_s + "and del_flg = 'N' and entity_cre_flg = 'Y' "
+	
+	print(sv_s)
+	
+	sv_d = urhk_dbsqlWithBind(sv_s)
+	print(sv_d)
+	
+	if(sv_d==0) then
+	#{
+		BANCS.OUTPUT.successOrFailure = "S"
+		sv_u = urhk_SetOrbOut("RESULT_MSG|Inuarance Deleted succesfully.Insuarance Id: " + CUST.CLIMM.insId)
+		sv_u = urhk_SetOrbOut("SuccessOrFailure|Y")
+		GOTO ENDOFSCRIPT
+	#}
+	else
+	#{
+		BANCS.OUTPUT.successOrFailure = "F"
+		sv_u = urhk_SetOrbErr("RESULT_MSG|Deletion Failed")
+		sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+		GOTO ENDOFSCRIPT
+	#}
+	endif
+	
+#}
+endif
+
+if(CUST.CLIMM.funcCode=="X") then
+#{
+	call("climm_table_cancel.scr")
+	sv_s = " delete custom.CIMM_MOD_TBL "
+	sv_s = sv_s + "where asset_id = '" +CUST.CLIMM.assetId+ "' and ins_id = '" + CUST.CLIMM.insId + "' and ins_done_by= '" + CUST.CLIMM.insProvider + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' "
+	sv_s = sv_s + "and del_flg = 'N' and entity_cre_flg = 'N' "
+	
+	print(sv_s)
+	
+	sv_d = urhk_dbsqlWithBind(sv_s)
+	print(sv_d)
+	
+	if(sv_d==0) then
+	#{
+		BANCS.OUTPUT.successOrFailure = "S"
+		sv_u = urhk_SetOrbOut("RESULT_MSG|Insuarance Record Cancelled succesfully")
+		sv_u = urhk_SetOrbOut("SuccessOrFailure|Y")
+		GOTO ENDOFSCRIPT
+	#}
+	else
+	#{
+		BANCS.OUTPUT.successOrFailure = "F"
+		sv_u = urhk_SetOrbErr("RESULT_MSG|Cancellation Failed")
+		sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+		GOTO ENDOFSCRIPT
+	#}
+	endif
+	
+#}
+endif
+
+if(CUST.CLIMM.funcCode=="I") then
+#{
+	BANCS.OUTPUT.successOrFailure = "S"
+	sv_u = urhk_SetOrbOut("RESULT_MSG|Inuarance Record Inquired succesfully")
+	sv_u = urhk_SetOrbOut("SuccessOrFailure|Y")
+	GOTO ENDOFSCRIPT
+	
+#}
+endif
+
+if(CUST.CLIMM.funcCode == "N") then
+#{
+			
+	call("climm_table_renew.scr")
+
+
+	sv_s = " insert into custom.CIMM_MOD_TBL (ins_id,cif_id,asset_grp_id,asset_id,ins_done_by,ins_policy_no,ins_company,policy_type,policy_start_date,policy_end_date,cover_note_no, "
+	sv_s = sv_s + " cover_note_exp_date,premium_amt,ins_amt,comission_amt,entity_cre_flg,del_flg,version_no,status,lchg_user_id,lchg_time,rcre_user_id,rcre_time) values( "
+	sv_s = sv_s + " '"+ CUST.CLIMM.insId +"','"+ CUST.CLIMM.cifId +"','"+ CUST.CLIMM.assetGrpId +"','"+ CUST.CLIMM.assetId +"','"+ CUST.CLIMM.insProvider +"','"+ CUST.CLIMM.insPolicyNo +"' , "
+	sv_s = sv_s + " '"+ CUST.CLIMM.insName +"','"+ CUST.CLIMM.policyType +"',to_date('"+ CUST.CLIMM.startDate +"'),to_date('"+ CUST.CLIMM.endDate +"') , "
+	sv_s = sv_s + " '"+ CUST.CLIMM.noteNo +"',to_date('"+ CUST.CLIMM.expiryDate +"'),'"+ CUST.CLIMM.premiumAmt +"', "
+	sv_s = sv_s + " '"+ CUST.CLIMM.insAmt +"','"+ CUST.CLIMM.comissionAmt +"','N','N', '1',null,'"+ BANCS.STDIN.userId +"', "
+	sv_s = sv_s + " sysdate,null,null) "
+	
+	print(sv_s)
+	sv_d = urhk_dbsqlWithBind(sv_s)
+	print(sv_d)
+	
+	if(sv_d==0) then
+	#{
+		BANCS.OUTPUT.successOrFailure = "S"
+		sv_u = urhk_SetOrbOut("RESULT_MSG|Insuarance created succesfully.Insurance Id is "+CUST.CLIMM.insId)
+		sv_u = urhk_SetOrbOut("SuccessOrFailure|Y")
+		GOTO ENDOFSCRIPT
+	#}
+	else
+	#{
+		BANCS.OUTPUT.successOrFailure = "F"
+		sv_u = urhk_SetOrbErr("RESULT_MSG|Renewal Failed")
+		sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+		GOTO ENDOFSCRIPT
+	#}
+	endif
+
+#}
+endif
+
+ENDOFSCRIPT:
+
+trace off
+end-->

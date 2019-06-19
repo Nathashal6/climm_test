@@ -39,6 +39,30 @@ trace on
 	CUST.CLIMM.assetGrpId = BANCS.INPUT.assetGrpId
 	print(CUST.CLIMM.assetGrpId)
 	
+	
+	
+	if(CUST.CLIMM.insProvider == "BY SLFL") THEN
+		CUST.CLIMM.insProviderTxt = "BY SFP"
+	ENDIF
+	
+	if(CUST.CLIMM.insProvider == "SLFL ON CREDIT") THEN
+		CUST.CLIMM.insProviderTxt = "SFP ON CREDIT"
+	ENDIF
+	
+	if(CUST.CLIMM.insProvider == "DIRECT BY APPLICANT ON CREDIT") THEN
+		CUST.CLIMM.insProviderTxt = "DIRECT BY APPLICANT ON CREDIT"
+	ENDIF
+	
+	if(CUST.CLIMM.insProvider == "EXISTING SLF") THEN
+		CUST.CLIMM.insProviderTxt = "EXISTING SFP"
+	ENDIF
+	
+	if(CUST.CLIMM.insProvider == "DIRECT INSURANCE PAID") THEN
+		CUST.CLIMM.insProviderTxt = "DIRECT INSURANCE PAID"
+	ENDIF
+	if(CUST.CLIMM.insProvider == "FREE INSURANCE GIVEN BY SALE") THEN
+		CUST.CLIMM.insProviderTxt = "FREE INSURANCE GIVEN BY SALE"
+	ENDIF
 
 IF (CUST.CLIMM.funcCode=="N") THEN
 #{	
@@ -61,7 +85,7 @@ IF (CUST.CLIMM.funcCode=="N") THEN
 					sv_a =  sv_a + "from custom.cust_setvar_maint "
 					sv_a =  sv_a + "where module_name ='INSURANCE' "
 					sv_a =  sv_a + "and sub_module_name = 'COVERTYPE' "
-					sv_a =  sv_a + "and type='TEXT'"
+					sv_a =  sv_a + "and type='TEXT' and del_flg='N' order by variable_value asc "
 					print(sv_a)
 					
 					sv_b = urhk_dbCursorOpenWithBind(sv_a)
@@ -93,11 +117,11 @@ IF (CUST.CLIMM.funcCode=="N") THEN
 					
 					PRINT(CUST.CLIMM.policyDescA)
 					sv_c = "policyDescA|" + CUST.CLIMM.policyDescA
-					sv_y = urhk_SetOrbOut(sv_c)
+					sv_y = urhk_SetOrbOut(sv_c + " ")
 					print(sv_y)
 					
-			sv_s = "expiryDate| select distinct to_char(cover_note_exp_date,'dd-mm-yyyy') from custom.cimm_tbl "
-			sv_s = sv_s + "where asset_id = '" +CUST.CLIMM.assetId+ "' and ins_done_by= '" + CUST.CLIMM.insProvider + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' and ins_id='" + CUST.CLIMM.insId + "' "
+			sv_s = "expiryDate| select distinct max(to_char(cover_note_exp_date,'dd-mm-yyyy')) from custom.cimm_tbl "
+			sv_s = sv_s + "where asset_id = '" +CUST.CLIMM.assetId+ "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' and ins_id='" + CUST.CLIMM.insId + "' "
 			sv_s = sv_s + "and del_flg = 'N' and entity_cre_flg = 'Y' "
 		
 			sv_b = urhk_dbSelectWithBind(sv_s)
@@ -109,30 +133,30 @@ IF (CUST.CLIMM.funcCode=="N") THEN
 			#}
 			endif
 					
-		sv_s = "datediff|SELECT TO_CHAR(DATE_PART('days',to_date((select to_char(db_stat_date,'dd-mm-yyyy') from tbaadm.gct),'dd-mm-yyyy') - "
-		sv_s = sv_s + " to_date('" + CUST.CLIMM.expiryDate + "','dd-mm-yyyy')),'9999') "
-		sv_s = sv_s + " from dual "
-	
-		sv_b = urhk_dbSelectWithBind(sv_s)
-		print(sv_b)
-		if(sv_b==0) then
-		#{
-			CUST.CLIMM.datediff = BANCS.OUTPARAM.datediff
-			print(CUST.CLIMM.datediff)
-			
-			if(CUST.CLIMM.datediff <= 0) then
-			#{
-				lv_b = urhk_SetOrbErr("Insuarance module is not expired.Renewal function is not allowed")
-				lv_b=urhk_SetOrbOut("SuccessOrFailure|N")
-				GOTO ENDOFSCRIPT
-			
-			#}
-			endif
-		#}
-		endif
+		#sv_s = "datediff|SELECT TO_CHAR(DATE_PART('days',to_date((select to_char(db_stat_date,'dd-mm-yyyy') from tbaadm.gct),'dd-mm-yyyy') - "
+		#sv_s = sv_s + " to_date('" + CUST.CLIMM.expiryDate + "','dd-mm-yyyy')),'9999') "
+		#sv_s = sv_s + " from dual "
+	    #
+		#sv_b = urhk_dbSelectWithBind(sv_s)
+		#print(sv_b)
+		#if(sv_b==0) then
+		##{
+		#	CUST.CLIMM.datediff = BANCS.OUTPARAM.datediff
+		#	print(CUST.CLIMM.datediff)
+		#	
+		#	if(CUST.CLIMM.datediff <= 0) then
+		#	#{
+		#		lv_b = urhk_SetOrbErr("Insuarance module is not expired.Renewal function is not allowed")
+		#		lv_b=urhk_SetOrbOut("SuccessOrFailure|N" + " ")
+		#		GOTO ENDOFSCRIPT
+		#	
+		#	#}
+		#	endif
+		##}
+		#endif
 					
 	sv_s = "recCount| select count(*) from custom.cimm_tbl "
-	sv_s = sv_s + "where asset_id = '" +CUST.CLIMM.assetId+ "' and ins_done_by= '" + CUST.CLIMM.insProvider + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' and ins_id='" + CUST.CLIMM.insId + "' "
+	sv_s = sv_s + "where asset_id = '" +CUST.CLIMM.assetId+ "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' and ins_id='" + CUST.CLIMM.insId + "' "
 	sv_s = sv_s + "and del_flg = 'N' and entity_cre_flg = 'Y' "
 
 	sv_b = urhk_dbSelectWithBind(sv_s)
@@ -141,6 +165,9 @@ IF (CUST.CLIMM.funcCode=="N") THEN
 	#{
 		CUST.CLIMM.recCount = BANCS.OUTPARAM.recCount
 		print(CUST.CLIMM.recCount)
+		
+		CUST.CLIMM.srl = CUST.CLIMM.recCount
+		print(CUST.CLIMM.srl)
 	#}
 	endif
 
@@ -162,14 +189,15 @@ IF (CUST.CLIMM.funcCode=="N") THEN
 					CUST.CLIMM.assetValue = BANCS.OUTPARAM.assetValue
 					print(CUST.CLIMM.assetValue)
 					
-					lv_b=urhk_SetOrbOut("SuccessOrFailure|Y")
+					lv_b=urhk_SetOrbOut("SuccessOrFailure|Y" + " ")
+					lv_b=urhk_SetOrbOut("insProviderTxt|" + CUST.CLIMM.insProviderTxt + " ")
 					
 					sv_c = "assetValue|" + CUST.CLIMM.assetValue
-					sv_y = urhk_SetOrbOut(sv_c)
+					sv_y = urhk_SetOrbOut(sv_c + " ")
 					print(sv_y)
 					
 					#sv_a = "SuccessOrFailure|Y"
-					#sv_b = urhk_SetOrbOut(sv_a)
+					#sv_b = urhk_SetOrbOut(sv_a + " ")
 					#print(sv_b)
 					GOTO ENDOFSCRIPT
 					
@@ -177,7 +205,7 @@ IF (CUST.CLIMM.funcCode=="N") THEN
 				ELSE
 		        #{
 					lv_b = urhk_SetOrbErr("Query Execution Failed")
-					lv_b=urhk_SetOrbOut("SuccessOrFailure|N")
+					lv_b=urhk_SetOrbOut("SuccessOrFailure|N" + " ")
 					GOTO ENDOFSCRIPT
 				#}
 				ENDIF
@@ -186,7 +214,7 @@ IF (CUST.CLIMM.funcCode=="N") THEN
 	#{
 		BANCS.OUTPUT.successOrFailure = "F"
 		sv_u = urhk_SetOrbErr("RESULT_MSG|Nothing to renew")
-		sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+		sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
 		GOTO ENDOFSCRIPT
 	#}
 	endif
@@ -195,7 +223,7 @@ IF (CUST.CLIMM.funcCode=="N") THEN
 	#{
 		BANCS.OUTPUT.successOrFailure = "F"
 		sv_u = urhk_SetOrbErr("RESULT_MSG|Account should exist for renewal functionality.")
-		sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+		sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
 		GOTO ENDOFSCRIPT
 	
 	

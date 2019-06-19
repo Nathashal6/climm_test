@@ -28,15 +28,14 @@ CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
 	sv_a = urhk_B2K_printRepos("BANCS")
 	
 	CUST.CLIMM.recCount = "0"
-	CUST.CLIMM.cifId = BANCS.INPUT.cifId
-	print(CUST.CLIMM.cifId)
-
+	CUST.CLIMM.assetGrpId = BANCS.INPUT.assetGrpId
+	print(CUST.CLIMM.assetGrpId)
 	
 	
 	#get Rec Count
 	sv_a = ""
-	sv_a = sv_a + "recCount|select count(*) from custom.lamm  "
-	sv_a = sv_a + "where cif_id='" + CUST.CLIMM.cifId + "' "
+	sv_a = sv_a + "recCount|select count(*) from custom.cipm_tbl "
+	sv_a = sv_a + "where module_name='CLIMM' and sub_module_name='COMISSION_VALUE' and del_flg='N' "
 	PRINT(sv_a)
 	
 	sv_b = urhk_dbSelectWithBind(sv_a)
@@ -49,14 +48,9 @@ CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
 	
 	IF(CUST.CLIMM.recCount != "0") THEN
 	#{
-		#sv_a =  "asst_type,asst_group_id, dateofreg, cifid| "
-		#sv_a = sv_a + " select asst_type,lagm.asst_group_id,asst_cre_date,cif_id from custom.lagm "
-		#sv_a = sv_a + ",custom.lamm where lagm.asst_group_id=lamm.asst_group_id "
-		#sv_a = sv_a + "and cif_id='" + CUST.CLIMM.cifId + "' "
-
-		sv_a = "asst_type,asst_group_id, dateofreg, cifid| "
-		sv_a = sv_a + "select asst_type,asst_group_id,asst_cre_date,cif_id from custom.lamm"
-		sv_a = sv_a + " where cif_id='" + CUST.CLIMM.cifId + "' "
+		sv_a =  "insName,insPercentage | "
+		sv_a = sv_a + " select variable_name,variable_value from custom.cipm_tbl "
+		sv_a = sv_a + "where module_name='CLIMM' and sub_module_name='COMISSION_VALUE' and del_flg='N' "
 		PRINT(sv_a)
 		
 		sv_b = urhk_dbCursorOpenWithBind(sv_a)
@@ -73,32 +67,15 @@ CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
 			#{
 			
 				sv_x = sv_x + 1
-				CUST.CLIMM.asst_type	= BANCS.OUTPARAM.asst_type
-				CUST.CLIMM.asst_group_id	= BANCS.OUTPARAM.asst_group_id
 				
-				IF(BANCS.OUTPARAM.dateofreg != "") THEN
-				#{
-					CUST.CLIMM.dateofreg   = BANCS.OUTPARAM.dateofreg
-				#}
-				else
-				#{
-					CUST.CLIMM.dateofreg = " "
-				#}
-				endif
-				
-				#CUST.CLIMM.count   = BANCS.OUTPARAM.count
-				CUST.CLIMM.cifid   = BANCS.OUTPARAM.cifid
-				#CUST.CLIMM.assetid   = BANCS.OUTPARAM.assetid
+				CUST.CLIMM.insName	= BANCS.OUTPARAM.insName
+				CUST.CLIMM.insPercentage	= BANCS.OUTPARAM.insPercentage
 				
 				sv_y = FORMAT$(sv_x,"%d")
 				PRINT(sv_y)
 				
-				sv_w = urhk_SetOrbOut("asst_type" + sv_y + "|" + CUST.CLIMM.asst_type + " ")
-				sv_w = urhk_SetOrbOut("asst_group_id" + sv_y + "|" + CUST.CLIMM.asst_group_id + " ")
-				sv_w = urhk_SetOrbOut("dateofreg" + sv_y + "|" + CUST.CLIMM.dateofreg + " ")
-				#sv_w = urhk_SetOrbOut("count" + sv_y + "|" + CUST.CLIMM.count + " ")
-				sv_w = urhk_SetOrbOut("cifid" + sv_y + "|" + CUST.CLIMM.cifid + " ")
-				#sv_w = urhk_SetOrbOut("assetid" + sv_y + "|" + CUST.CLIMM.assetid  + " ")
+				sv_w = urhk_SetOrbOut("insName" + sv_y + "|" + CUST.CLIMM.insName + " ")
+				#sv_w = urhk_SetOrbOut("insPercentage" + sv_y + "|" + CUST.CLIMM.insPercentage + " ")
 				
 				sv_c = urhk_dbCursorFetch(sv_e)
 			#}

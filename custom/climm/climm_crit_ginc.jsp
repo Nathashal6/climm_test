@@ -34,6 +34,9 @@
 	var insProvider = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".insProvider",""))%>';
 	var insId = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".insId",""))%>';
 	var cifId = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".cifId",""))%>';
+	var srchCriteria = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".srchCriteria",""))%>';
+	var searchValue = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".searchValue",""))%>';
+	var term = '<%=ParseValue.checkString(ARJspCurr.getInput(sSubGrpName+".term",""))%>';
 
 </script>
 

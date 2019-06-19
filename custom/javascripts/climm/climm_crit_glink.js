@@ -2,6 +2,7 @@ function printBlock()
 {
 	writeCustomHeader("climm_crit");
 	with (document){
+	write('<input type="hidden" class="textfieldfont" name="climm.term" id="term">');
 	write('<table border="0" cellspacing="0" cellpadding="0" class="ctable">');
 	write('<tr>');
 	write('<td>');
@@ -40,7 +41,8 @@ function printBlock()
 		write('<td class="textfield" id="insField">');
 		write('<input hotKeyId="search1" type="text" class="textfieldfont" name="' + subGroupName + '.insId" id="insId" ' + climmProps.get("insId_ENABLED") + ' style="width: 119px" maxlength="15" onChange="javascript:return InsIdValidate(insId);">');
 		write('<a href="javascript:fninsIdList();">');
-		write('<img border="0" height="17" hotKeyId="search1" src="../Renderer/images/'+applangcode+'/search_icon.gif" width="16">');
+		//write('<img border="0" height="17" hotKeyId="search1" src="../Renderer/images/'+applangcode+'/search_icon.gif" width="16">');
+		write('<i class="material-icons" value="search" id="search1"  hotKeyId="search1">&#xE8B6;</i></a>&nbsp;');
 		write('</a>');
 		write('</td>');
 	write('</tr>');
@@ -49,19 +51,21 @@ function printBlock()
 	
 		 write('<td class="textlabel" style="height: 15px">' + jspResArr.get("FCLAO060") + '<script>setMandatory("Y");</script></td>');
 		 write('<td class="textfield">');
-		 write('<input type="text" class="textfieldfont" name="' + subGroupName + '.cifId" id="cifId" ' + climmProps.get("cifId_ENABLED") + ' style="height: 15px; width: 185px" onBlur="javascript:return cifValidate(cifId);">');
+		 write('<input type="text" class="textfieldfont" hotKeyId="cifId" name="' + subGroupName + '.cifId" id="cifId" ' + climmProps.get("cifId_ENABLED") + ' style="height: 15px; width: 185px" onchange="javascript:return cifValidate(cifId);">');
 		 write('&nbsp;');
 		 write('<a id="sLnk3" href="javascript:showCifId(document.forms[0].cifId,\'\',\'F\',document.forms[0].custName)">');
-		 write('<img id="cifSearch" border="0" height="17" hotKeyId="search1" src="../Renderer/images/'+applangcode+'/search_icon.gif">');
+		 //write('<img id="cifSearch" border="0" height="17" hotKeyId="search1" src="../Renderer/images/'+applangcode+'/search_icon.gif">');
+		 write('<i class="material-icons" value="search" id="search1"  hotKeyId="cifId">&#xE8B6;</i></a>&nbsp;');
 		 write('</a>');
 		 write('<input name="' + subGroupName + '.custName" id="custName" type="text" readonly enabled class="label">');
 		 write('</td>');
 
 		write('<td class="textlabel">' + jspResArr.get("FCLAO012") + '</td>');
 		write('<td class="textfield">');
-		write('<input hotKeyId="search1" type="text" class="textfieldfont" name="' + subGroupName + '.assetGrpId" id="assetGrpId" ' + climmProps.get("assetGrpId_ENABLED") + ' style="width: 119px" maxlength="25" onBlur="javascript:return fnassetGrpId(assetGrpId);">');
+		write('<input hotKeyId="search1" type="text" class="textfieldfont" name="' + subGroupName + '.assetGrpId" id="assetGrpId" ' + climmProps.get("assetGrpId_ENABLED") + ' style="width: 119px" maxlength="25" onchange="javascript:return fnassetGrpId(assetGrpId);">');
 		write('<a href="javascript:fnassetGrpIdList();">');
-		write('<img border="0" height="17" hotKeyId="search1" src="../Renderer/images/'+applangcode+'/search_icon.gif" width="16">');
+		//write('<img border="0" height="17" hotKeyId="search1" src="../Renderer/images/'+applangcode+'/search_icon.gif" width="16">');
+		write('<i class="material-icons" value="search" id="search1"  hotKeyId="search1">&#xE8B6;</i></a>&nbsp;');
 		write('</a>');
 		write('</td>');
 		
@@ -72,25 +76,47 @@ function printBlock()
 		write('<td class="textfield">');
 		write('<input hotKeyId="search1" type="text" class="textfieldfont" name="' + subGroupName + '.assetId" id="assetId" ' + climmProps.get("assetId_ENABLED") + ' style="width: 119px" maxlength="25">');
 		write('<a href="javascript:fnAssetIdList();">');
-		write('<img border="0" height="17" hotKeyId="search1" src="../Renderer/images/'+applangcode+'/search_icon.gif" width="16">');
+		//write('<img border="0" height="17" hotKeyId="search1" src="../Renderer/images/'+applangcode+'/search_icon.gif" width="16">');
+		write('<i class="material-icons" value="search" id="search1"  hotKeyId="search1">&#xE8B6;</i></a>&nbsp;');
 		write('</a>');
 		write('</td>');
 		
 		write('<td class="textlabel" style="height: 28px; width: 136px">' + jspResArr.get("FCLAO014") + '</td>');
 		write('<td class="textfield" style="width: 189px">');
-		write('<select name="' + subGroupName + '.insProvider" id="insProvider" ' + climmProps.get("insProvider_ENABLED") + '   class="listboxfont" onblur="javascript:return climm_crit_ONBLUR1(this);" onChange="javascript:return climm_crit_ONCHANGE2(this);">');
+		write('<select name="' + subGroupName + '.insProvider" id="insProvider" ' + climmProps.get("insProvider_ENABLED") + '   class="listboxfont">');
+		write('<option value=""></option>');
 		write('<option value="BY SLFL">' + jspResArr.get("FCLAO050") + '</option>');
 		write('<option value="SLFL ON CREDIT">' + jspResArr.get("FCLAO051") + '</option>');
 		write('<option value="DIRECT BY APPLICANT ON CREDIT">' + jspResArr.get("FCLAO052") + '</option>');
 		write('<option value="EXISTING SLF">' + jspResArr.get("FCLAO053") + '</option>');
-		write('<option value="DIRECT INSUARANCE PAID">' + jspResArr.get("FCLAO054") + '</option>');
-		write('<option value="FREE INSUARANCE GIVEN BY SALE">' + jspResArr.get("FCLAO055") + '</option>');
+		write('<option value="DIRECT INSURANCE PAID">' + jspResArr.get("FCLAO054") + '</option>');
+		write('<option value="FREE INSURANCE GIVEN BY SALE">' + jspResArr.get("FCLAO055") + '</option>');
 		write('</select>');
 		write('</td>');
 		
 		write('<td class="columnwidth" style="width: 47px"> </td>');
 		write('<td class="textlabel" style="width: 123px"> </td>');
 		write('<td class="textfield">   </td>');
+	write('</tr>');
+	
+	write('<tr id="Row4">')
+		write('<td class="textlabel" style="height: 28px; width: 136px">' + jspResArr.get("FCLAO020") + '</td>');
+		write('<td class="textfield" style="width: 189px">');
+		write('<select name="' + subGroupName + '.srchCriteria" id="srchCriteria" ' + climmProps.get("srchCriteria_ENABLED") + '   class="listboxfont" onblur="javascript:return climm_crit_ONBLUR1(this);" onChange="javascript:return climm_crit_ONCHANGE2(this);">');
+		write('<option value="CHASSIS NO">' + jspResArr.get("FCLAO021") + '</option>');
+		write('<option value="VEHICLE NO">' + jspResArr.get("FCLAO022") + '</option>');
+		write('<option value="ENGINE NO">' + jspResArr.get("FCLAO024") + '</option>');
+		write('</select>');
+		write('</td>');
+		
+		write('<td class="textlabel">' + jspResArr.get("FCLAO023") + '</td>');
+		write('<td class="textfield">');
+		write('<input hotKeyId="search1" type="text" class="textfieldfont" name="' + subGroupName + '.searchValue" id="searchValue" ' + climmProps.get("searchValue_ENABLED") + ' style="width: 119px" maxlength="25">');
+		write('<a href="javascript:fnsearchValueList();">');
+		//write('<img border="0" height="17" hotKeyId="search1" src="../Renderer/images/'+applangcode+'/search_icon.gif" width="16">');
+		write('<i class="material-icons" value="search" id="search1"  hotKeyId="search1">&#xE8B6;</i></a>&nbsp;');
+		write('</a>');
+		write('</td>');
 	write('</tr>');
 	
 	write('</table>');
@@ -114,7 +140,7 @@ function printFooterBlock()
 {
 	with (document) {
 	if ((sReferralMode == 'I')||(sReferralMode == 'S')){
-	write('<div align="left" class="ctable">');
+	write('<div align="left" class="ctable custom-buttons button-wrapper-fixed">');
 	if (sReferralMode == 'S'){
 	write('<input type="button" class="Button" id="Submit" value="'+jspResArr.get("FCLAO016")+ '" onClick="javascript:return doRefSubmit(this);" hotKeyId="Submit" >');
 	}
@@ -122,7 +148,7 @@ function printFooterBlock()
 	write('<input type="button" class="Button" id="_BackRef_" value="'+jspResArr.get("FCLAO017")+ '" onClick="javascript:return doSubmit(this.id);" hotKeyId="Cancel" >');
 	write('</div>');
 	}else{
-	write('<div class="ctable">');
+	write('<div class="ctable custom-buttons button-wrapper-fixed">');
 	write('<input id="Accept" name="Go" type="button" class="button"	onClick="javascript:return climm_crit_ONCLICK4(this,this);"" value="' + jspResArr.get("FCLAO018") + '" hotKeyId="Go">');
 	write('<input id="Clear" name="Cancel" type="button" class="button" value="' + jspResArr.get("FCLAO017") + '"	onClick="javascript:return climm_crit_ONCLICK5(this);"">');
 	writeFooter();

@@ -28,8 +28,8 @@ CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
 	sv_a = urhk_B2K_printRepos("BANCS")
 	
 	CUST.CLIMM.recCount = "0"
-	CUST.CLIMM.insId = BANCS.INPUT.insId
-	print(CUST.CLIMM.insId)
+	CUST.CLIMM.cifId = BANCS.INPUT.cifId
+	print(CUST.CLIMM.cifId)
 	CUST.CLIMM.funcCode = BANCS.INPUT.funcCode
 	print(CUST.CLIMM.funcCode)	
 	
@@ -37,7 +37,7 @@ CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
 	#{
 	#get Rec Count
 	sv_a = ""
-	sv_a = sv_a + "recCount|select count(*) from custom.cimm_mod_tbl where del_flg='N' "
+	sv_a = sv_a + "recCount|select count(*) from custom.cimm_mod_tbl where del_flg='N' and cif_id='" + BANCS.INPUT.cifId + "' "
 	PRINT(sv_a)
 	
 	sv_b = urhk_dbSelectWithBind(sv_a)
@@ -50,11 +50,10 @@ CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
 	
 	IF(CUST.CLIMM.recCount != "0") THEN
 	#{
-		sv_a =  "ins_id,cif_id,asset_grp_id,asset_id,insProvider| "
-		sv_a = sv_a + "select distinct ins_id,cif_id,asset_grp_id,asset_id,ins_done_by from custom.cimm_mod_tbl c1 where del_flg='N'  "
-		#sv_a = sv_a + " and not exists(select 1 from custom.cimm_tbl c2 where c2.asset_id = c1.asset_id) "
-		#sv_a = sv_a + " and not exists(select 1 from custom.cimm_mod_tbl c2 where c2.asset_id = c1.asset_id) "
-		#sv_a = sv_a + " where cimm_mod_tbl.ins_id='"+ CUST.CLIMM.insId +"' and del_flg='N' "
+		sv_a =  "ins_id,asset_grp_id,asset_id,insProvider,term| "
+		sv_a = sv_a + "select distinct ins_id,asset_grp_id,asset_id,ins_done_by, "
+		sv_a = sv_a + "(select max(srl_num) from custom.cimm_mod_tbl where  cif_id= c1.cif_id and ins_id =c1.ins_id) from custom.cimm_mod_tbl c1 where del_flg='N' "   
+		sv_a = sv_a + "and c1.cif_id='"+CUST.CLIMM.cifId+"' "
 		PRINT(sv_a)
 		
 		sv_b = urhk_dbCursorOpenWithBind(sv_a)
@@ -72,19 +71,21 @@ CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
 			
 				sv_x = sv_x + 1
 				CUST.CLIMM.ins_id	= BANCS.OUTPARAM.ins_id
-				CUST.CLIMM.cif_id   = BANCS.OUTPARAM.cif_id
+				#CUST.CLIMM.cif_id   = BANCS.OUTPARAM.cif_id
 				CUST.CLIMM.asset_grp_id	= BANCS.OUTPARAM.asset_grp_id
 				CUST.CLIMM.asset_id   = BANCS.OUTPARAM.asset_id
 				CUST.CLIMM.insProvider   = BANCS.OUTPARAM.insProvider
+				CUST.CLIMM.term   = BANCS.OUTPARAM.term
 				
 				sv_y = FORMAT$(sv_x,"%d")
 				PRINT(sv_y)
 				
-				sv_w = urhk_SetOrbOut("ins_id" + sv_y + "|" + CUST.CLIMM.ins_id)
-				sv_w = urhk_SetOrbOut("asset_grp_id" + sv_y + "|" + CUST.CLIMM.asset_grp_id) 
-				sv_w = urhk_SetOrbOut("asset_id" + sv_y + "|" + CUST.CLIMM.asset_id) 
-				sv_w = urhk_SetOrbOut("cif_id" + sv_y + "|" + CUST.CLIMM.cif_id)
-				sv_w = urhk_SetOrbOut("insProvider" + sv_y + "|" + CUST.CLIMM.insProvider)
+				sv_w = urhk_SetOrbOut("ins_id" + sv_y + "|" + CUST.CLIMM.ins_id + " ")
+				sv_w = urhk_SetOrbOut("asset_grp_id" + sv_y + "|" + CUST.CLIMM.asset_grp_id + " ")
+				sv_w = urhk_SetOrbOut("asset_id" + sv_y + "|" + CUST.CLIMM.asset_id + " ")
+				#sv_w = urhk_SetOrbOut("cif_id" + sv_y + "|" + CUST.CLIMM.cif_id + " ")
+				sv_w = urhk_SetOrbOut("insProvider" + sv_y + "|" + CUST.CLIMM.insProvider + " ")
+				sv_w = urhk_SetOrbOut("term" + sv_y + "|" + CUST.CLIMM.term + " ")
 				
 				sv_c = urhk_dbCursorFetch(sv_e)
 			#}
@@ -93,14 +94,14 @@ CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
 			if(sv_x == 0) then
 			#{
 				sv_u = "insId|"+CUST.CLIMM.ins_id
-				sv_v = urhk_SetOrbOut(sv_u)
+				sv_v = urhk_SetOrbOut(sv_u + " ")
 			#}
 			ENDIF
 		#}
 		ELSE
 		#{
 			sv_u = "insId|"+CUST.CLIMM.ins_id
-			sv_v = urhk_SetOrbOut(sv_u)
+			sv_v = urhk_SetOrbOut(sv_u + " ")
 		#}
 		ENDIF
 	#}
@@ -112,7 +113,7 @@ CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
 	#{
 	#get Rec Count
 	sv_a = ""
-	sv_a = sv_a + "recCount|select count(*) from custom.cimm_tbl where del_flg='N' and entity_cre_flg='Y' "
+	sv_a = sv_a + "recCount|select count(*) from custom.cimm_tbl where del_flg='N' and entity_cre_flg='Y' and cif_id='" +BANCS.INPUT.cifId+ "' "
 	PRINT(sv_a)
 	
 	sv_b = urhk_dbSelectWithBind(sv_a)
@@ -125,9 +126,9 @@ CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
 	
 	IF(CUST.CLIMM.recCount != "0") THEN
 	#{
-		sv_a =  "ins_id,cif_id,asset_grp_id,asset_id,insProvider| "
-		sv_a = sv_a + "select distinct ins_id,cif_id,asset_grp_id,asset_id,ins_done_by from custom.cimm_tbl where del_flg='N'  "
-		#sv_a = sv_a + " where cimm_tbl.ins_id='"+ CUST.CLIMM.insId +"' and del_flg='N' "
+		sv_a =  "ins_id,asset_grp_id,asset_id,insProvider,term| "
+		sv_a = sv_a + "select distinct ins_id,asset_grp_id,asset_id,ins_done_by,srl_num from custom.cimm_tbl where del_flg='N' "
+		sv_a = sv_a + " and cif_id='" +BANCS.INPUT.cifId+ "' order by srl_num desc"
 		PRINT(sv_a)
 		
 		sv_b = urhk_dbCursorOpenWithBind(sv_a)
@@ -145,19 +146,29 @@ CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
 			
 				sv_x = sv_x + 1
 				CUST.CLIMM.ins_id	= BANCS.OUTPARAM.ins_id
-				CUST.CLIMM.cif_id   = BANCS.OUTPARAM.cif_id
+				#CUST.CLIMM.cif_id   = BANCS.OUTPARAM.cif_id
 				CUST.CLIMM.asset_grp_id	= BANCS.OUTPARAM.asset_grp_id
 				CUST.CLIMM.asset_id   = BANCS.OUTPARAM.asset_id
 				CUST.CLIMM.insProvider   = BANCS.OUTPARAM.insProvider
+				if(BANCS.OUTPARAM.term != "") then
+				#{
+					CUST.CLIMM.term   = BANCS.OUTPARAM.term
+				#}
+				else
+				#{
+					CUST.CLIMM.term   = " "
+				#}
+				endif
 				
 				sv_y = FORMAT$(sv_x,"%d")
 				PRINT(sv_y)
 				
-				sv_w = urhk_SetOrbOut("ins_id" + sv_y + "|" + CUST.CLIMM.ins_id)
-				sv_w = urhk_SetOrbOut("asset_grp_id" + sv_y + "|" + CUST.CLIMM.asset_grp_id) 
-				sv_w = urhk_SetOrbOut("asset_id" + sv_y + "|" + CUST.CLIMM.asset_id) 
-				sv_w = urhk_SetOrbOut("cif_id" + sv_y + "|" + CUST.CLIMM.cif_id)
-				sv_w = urhk_SetOrbOut("insProvider" + sv_y + "|" + CUST.CLIMM.insProvider)
+				sv_w = urhk_SetOrbOut("ins_id" + sv_y + "|" + CUST.CLIMM.ins_id + " ")
+				sv_w = urhk_SetOrbOut("asset_grp_id" + sv_y + "|" + CUST.CLIMM.asset_grp_id + " ")
+				sv_w = urhk_SetOrbOut("asset_id" + sv_y + "|" + CUST.CLIMM.asset_id + " ")
+				#sv_w = urhk_SetOrbOut("cif_id" + sv_y + "|" + CUST.CLIMM.cif_id + " ")
+				sv_w = urhk_SetOrbOut("insProvider" + sv_y + "|" + CUST.CLIMM.insProvider + " ")
+				sv_w = urhk_SetOrbOut("term" + sv_y + "|" + CUST.CLIMM.term + " ")
 				
 				sv_c = urhk_dbCursorFetch(sv_e)
 			#}
@@ -166,14 +177,14 @@ CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
 			if(sv_x == 0) then
 			#{
 				sv_u = "insId|"+CUST.CLIMM.ins_id
-				sv_v = urhk_SetOrbOut(sv_u)
+				sv_v = urhk_SetOrbOut(sv_u + " ")
 			#}
 			ENDIF
 		#}
 		ELSE
 		#{
 			sv_u = "insId|"+CUST.CLIMM.ins_id
-			sv_v = urhk_SetOrbOut(sv_u)
+			sv_v = urhk_SetOrbOut(sv_u + " ")
 		#}
 		ENDIF
 	#}

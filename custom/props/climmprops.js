@@ -50,6 +50,12 @@ var climmLocObj ={
 	policyDescA_ENABLED:"enabled",
 	policyDescA_MANDATORY:"N",
 	credPeriod_ENABLED:"enabled",
-	credPeriod_MANDATORY:"N"
+	credPeriod_MANDATORY:"N",
+	srchCriteria_ENABLED:"enabled",
+	srchCriteria_MANDATORY:"N",
+	searchValue_ENABLED:"enabled",
+	searchValue_MANDATORY:"N",
+	term_ENABLED:"enabled",
+	term_MANDATORY:"N"
 	};
 var climmProps =  new Properties(climmLocObj);

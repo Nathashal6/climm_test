@@ -1,0 +1,120 @@
+<--start
+
+trace on
+
+
+	sv_s = urhk_B2k_printRepos("BANCS")
+	PRINT(sv_s)
+
+	
+	if(fieldexists(BANCS.INPUT.funcCode) ==0) THEN
+		BANCS.INPUT.funcCode = ""
+	endif
+	
+	if(fieldexists(BANCS.INPUT.insId) ==0) THEN
+		BANCS.INPUT.insId = ""
+	endif
+
+	
+	IF (REPEXISTS("LINREP") == 0) THEN
+	#{
+		CREATEREP("LINREP")
+	#}
+	ENDIF
+	IF (CLASSEXISTS("LINREP", "DATA") == 0) THEN
+	#{
+		CREATECLASS("LINREP", "DATA", 5)
+	#}
+	ENDIF
+	
+	sv_a =  " "
+	sv_a =  sv_a + "countData|select count(*) "
+	sv_a =  sv_a + "from custom.cimm_tbl"
+	sv_a =  sv_a + "where ins_id ='"+BANCS.INPUT.insId+"' "
+	sv_a =  sv_a + "and entity_cre_flg='Y' "
+	sv_a =  sv_a + "and del_flg='N' "
+	print(sv_a)
+
+	sv_z = urhk_dbSelectWithBind(sv_a)
+	print(sv_z)
+	
+	IF (sv_z == 0) THEN
+	#{
+		LINREP.DATA.countData = BANCS.OUTPARAM.countData
+		print(LINREP.DATA.countData)
+	
+	#}
+	endif
+	
+	LINREP.DATA.funcCode		= BANCS.INPUT.funcCode
+	LINREP.DATA.cifId		= BANCS.INPUT.cifId
+	LINREP.DATA.assetId        = BANCS.INPUT.assetId
+	LINREP.DATA.assetGrpId     = BANCS.INPUT.assetGrpId
+	LINREP.DATA.insName  = BANCS.INPUT.insName
+	LINREP.DATA.policyType		= BANCS.INPUT.policyType
+	LINREP.DATA.insProvider		= BANCS.INPUT.insProvider
+	LINREP.DATA.startDate        = BANCS.INPUT.startDate
+	LINREP.DATA.endDate     = BANCS.INPUT.endDate
+	LINREP.DATA.noteNo     = BANCS.INPUT.noteNo
+	LINREP.DATA.expiryDate  = BANCS.INPUT.expiryDate
+	LINREP.DATA.credAmt		= BANCS.INPUT.credAmt
+	LINREP.DATA.comissionAmt		= BANCS.INPUT.comissionAmt
+	LINREP.DATA.insAmt        = BANCS.INPUT.insAmt
+	LINREP.DATA.premiumAmt     = BANCS.INPUT.premiumAmt
+	LINREP.DATA.credPeriod  = BANCS.INPUT.credPeriod
+	LINREP.DATA.insId  = BANCS.INPUT.insId
+	LINREP.DATA.insPolicyNo  = BANCS.INPUT.insPolicyNo
+	LINREP.DATA.policyDescA  = BANCS.INPUT.policyDescA
+	LINREP.DATA.chekValA  = BANCS.INPUT.chekValA
+	
+	BANCS.INPUT.funcCode	 = LINREP.DATA.funcCode
+	BANCS.INPUT.cifId		 = LINREP.DATA.cifId
+	BANCS.INPUT.assetId      = LINREP.DATA.assetId
+	BANCS.INPUT.assetGrpId   = LINREP.DATA.assetGrpId
+	BANCS.INPUT.insName      = LINREP.DATA.insName
+	BANCS.INPUT.policyType   = LINREP.DATA.policyType
+	BANCS.INPUT.insProvider	 = LINREP.DATA.insProvider
+	BANCS.INPUT.startDate    = LINREP.DATA.startDate
+	BANCS.INPUT.endDate      = LINREP.DATA.endDate
+	BANCS.INPUT.noteNo      = LINREP.DATA.noteNo
+	BANCS.INPUT.expiryDate   = LINREP.DATA.expiryDate
+	BANCS.INPUT.credAmt		 = LINREP.DATA.credAmt
+	BANCS.INPUT.comissionAmt = LINREP.DATA.comissionAmt
+	BANCS.INPUT.insAmt       = LINREP.DATA.insAmt
+	BANCS.INPUT.premiumAmt   = LINREP.DATA.premiumAmt
+	BANCS.INPUT.credPeriod   = LINREP.DATA.credPeriod
+	BANCS.INPUT.insId  		 = LINREP.DATA.insId
+	BANCS.INPUT.insPolicyNo  		 = LINREP.DATA.insPolicyNo
+	BANCS.INPUT.policyDescA = LINREP.DATA.policyDescA
+	BANCS.INPUT.chekValA  = LINREP.DATA.chekValA
+	BANCS.INPUT.insCover2  = LINREP.DATA.insCover2
+	print(BANCS.INPUT.insCover2)
+	call("cmlim_submit.scr")
+	
+	PRINT(BANCS.OUTPUT.isError)
+	LINREP.DATA.isError 	= BANCS.OUTPUT.isError 	
+	LINREP.DATA.errMsg 		= BANCS.OUTPUT.errMsg 
+	LINREP.DATA.successMsg 	= BANCS.OUTPUT.successMsg 
+	LINREP.DATA.insId 	= BANCS.OUTPUT.insId 
+
+	if(LINREP.DATA.isError == "Y") then
+	#{
+		GOTO ERRORMSGAPI
+	#}
+	ELSE
+	#{
+		GOTO SUCCESSMSGAPI
+	#}
+	ENDIF
+	
+	ERRORMSGAPI:
+		GOTO ENDOFAPI
+	
+	SUCCESSMSGAPI:
+	
+		sv_u = urhk_SetOrbOut("INSID|" + LINREP.DATA.insId + " ")
+	ENDOFAPI:
+		sv_u = urhk_SetOrbOut("INSID|  ")
+trace off
+
+end-->

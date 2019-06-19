@@ -36,27 +36,31 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 	CUST.CLIMM.funcCode = BANCS.INPUT.funcCode
 	CUST.CLIMM.chekValA = BANCS.INPUT.chekValA
 	print(CUST.CLIMM.chekValA)
+	CUST.CLIMM.policyDescA = BANCS.INPUT.policyDescA
+	print(CUST.CLIMM.policyDescA)
+	CUST.CLIMM.insId = BANCS.INPUT.insId
+	print(CUST.CLIMM.insId)
 	
 	
 	IF (CUST.CLIMM.funcCode=="V") THEN
 	#{	
-			sv_x = 1
-			CUST.CLIMM.txtRecCount = BANCS.INPUT.insCover2
-			print(CUST.CLIMM.txtRecCount)
-	
-		WHILE(sv_x < CUST.CLIMM.txtRecCount)
-		#{
-		sv_q = GETPOSITION(CUST.CLIMM.chekValA,"!")
-		CUST.CLIMM.chekVal=  MID$(CUST.CLIMM.chekValA, 0 ,sv_q - 1)
-		PRINT(CUST.CLIMM.chekVal)
-		CUST.CLIMM.chekValA = MID$(CUST.CLIMM.chekValA,sv_q,STRLEN(CUST.CLIMM.chekValA))
-		PRINT(CUST.CLIMM.chekValA)
-		
-		sv_q = GETPOSITION(CUST.CLIMM.policyDescA,"!")
-		CUST.CLIMM.policyDesc=  MID$(CUST.CLIMM.policyDescA, 0 ,sv_q - 1)
-		PRINT(CUST.CLIMM.chekVal)
-		CUST.CLIMM.policyDescA = MID$(CUST.CLIMM.policyDescA,sv_q,STRLEN(CUST.CLIMM.policyDescA))
-		PRINT(CUST.CLIMM.policyDescA)
+	#		sv_x = 1
+	#		CUST.CLIMM.txtRecCount = BANCS.INPUT.insCover2
+	#		print(CUST.CLIMM.txtRecCount)
+	#
+	#	WHILE(sv_x < CUST.CLIMM.txtRecCount)
+	#	#{
+	#	sv_q = GETPOSITION(CUST.CLIMM.chekValA,"!")
+	#	CUST.CLIMM.chekVal=  MID$(CUST.CLIMM.chekValA, 0 ,sv_q - 1)
+	#	PRINT(CUST.CLIMM.chekVal)
+	#	CUST.CLIMM.chekValA = MID$(CUST.CLIMM.chekValA,sv_q,STRLEN(CUST.CLIMM.chekValA))
+	#	PRINT(CUST.CLIMM.chekValA)
+	#	
+	#	sv_q = GETPOSITION(CUST.CLIMM.policyDescA,"!")
+	#	CUST.CLIMM.policyDesc=  MID$(CUST.CLIMM.policyDescA, 0 ,sv_q - 1)
+	#	PRINT(CUST.CLIMM.chekVal)
+	#	CUST.CLIMM.policyDescA = MID$(CUST.CLIMM.policyDescA,sv_q,STRLEN(CUST.CLIMM.policyDescA))
+	#	PRINT(CUST.CLIMM.policyDescA)
 
 		sv_a = ""
 		sv_a = sv_a + "insert into CUSTOM.CIMM_COVER "
@@ -73,6 +77,7 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 		#{
 			CUST.CLIMM.isError = "Y"
 			CUST.CLIMM.errMsg = "Insertion failed for the Cover TABLE table"
+			GOTO ENDOFSCRIPT
 		#}
 		ELSE
 		#{
@@ -103,11 +108,11 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 		
 		
 
-		ENDOFLOOP:
-		
-		sv_x = sv_x + 1
-	#}
-	DO
+	#	ENDOFLOOP:
+	#	
+	#	sv_x = sv_x + 1
+	##}
+	#DO
 	
 	
 	

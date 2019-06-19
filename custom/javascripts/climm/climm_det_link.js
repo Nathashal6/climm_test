@@ -9,22 +9,225 @@ function fnValidateData()
 	
 }
 
-function fnValAmt(obj)
-{ 
-	var crAmt = millionFormat(obj.value);
-	if(!fnIsNull(crAmt))
-	{
-		if(!isNaN(crAmt))
+function fnCheckMandatoryFields()
+{
+	
+		var ObjForm = document.forms[0];
+
+		if(ObjForm.startDate.value == "" )
 		{
-			obj.value = Number(crAmt).toLocaleString();
-		}
-		else
-		{
-			alert("Invalid Amount");
-			obj.focus();
-			obj.value="";
+			alert("Policy Start Date is mandatory");		
+			document.forms[0].startDate.focus();
 			return false;
 		}
+		
+		if(ObjForm.endDate.value == "" )
+		{
+			alert("Policy End Date is mandatory");		
+			document.forms[0].endDate.focus();
+			return false;
+		}
+
+		//if(ObjForm.expiryDate.value == "" )
+		//{
+		//	alert("Cover Note Expiry Date is mandatory");		
+		//	document.forms[0].expiryDate.focus();
+		//	return false;
+		//}
+		
+		if(ObjForm.premiumAmt.value == "" )
+		{
+			alert("Premium Amount is mandatory");		
+			document.forms[0].premiumAmt.focus();
+			return false;
+		}
+		
+		if(ObjForm.insAmt.value == "" )
+		{
+			alert("Insurance Amount is mandatory");		
+			document.forms[0].insAmt.focus();
+			return false;
+		}
+		
+		if(ObjForm.insName.value == "" )
+		{
+			alert("Insurance Company is mandatory");		
+			document.forms[0].insName.focus();
+			return false;
+		}
+		
+		if(ObjForm.insAmt.value <= 0 )
+		{
+			alert("Insurance Amount should be greater than zero");		
+			document.forms[0].insAmt.focus();
+			return false;
+		}
+
+		if(insProvider == "SLFL ON CREDIT")
+		{
+			if(ObjForm.credAmt.value == "" )
+			{
+				alert("Credit Amount is mandatory");		
+				document.forms[0].credAmt.focus();
+				return false;
+			}
+			
+			if(ObjForm.credPeriod.value == "" )
+			{
+				alert("Credit Period is mandatory");		
+				document.forms[0].credPeriod.focus();
+				return false;
+			}
+			
+			if(ObjForm.credAmt.value <= 0 )
+			{
+				alert("Credit Amount should be greater than 0");		
+				document.forms[0].credAmt.focus();
+				return false;
+			}
+			
+			if(ObjForm.credPeriod.value <= 0 )
+			{
+				alert("Credit Period should be greater than 0");		
+				document.forms[0].credPeriod.focus();
+				return false;
+			}
+			
+			if(Number(ObjForm.credAmt.value) > Number(ObjForm.premiumAmt.value))
+			{
+				alert("Credit Amount Should Be lesser than Premium Amount");		
+				document.forms[0].credPeriod.focus();
+				return false;
+			}
+
+			
+		}
+		
+	return true;
+}
+
+function setTSAmount(fielId)
+{
+        var amt1 = fielId.value.replace(/,/g, '');
+		
+		var regex  = /^\d+(?:\.\d{0,2})$/;		
+		if (regex.test(amt1))
+		{
+			amt1 = millionFormat(amt1);
+			if(!isNaN(amt1 )){
+				if(Number(amt1)<0)
+				{
+					alert("Value cannot be less than 0");
+					amt1=0;
+					
+				}
+				fielId.value = Number(amt1).toLocaleString();
+			}
+		}
+		else
+		{	
+			if(!isNaN(amt1 )){
+				if(Number(amt1)<0)
+				{
+					alert("Value cannot be less than 0");
+					amt1=0;
+					
+				}
+				fielId.value = Number(amt1).toLocaleString();
+			}
+			else
+			{
+				alert("Invalid amount");
+				fielId.value="0.00";
+				fielId.focus;
+				return;
+			}
+			
+		}
+		
+		
+		
+			
+
+		
+}
+
+function endDateValidation()
+{
+	var Date1 = document.forms[0].startDate.value;
+	if(Date1 != "")
+	{
+		var input = "startDate|" + Date1;
+		var scrName = "climm_endDate.scr";
+		var output = "";
+		var retVal = appFnExecuteScript(input,output,scrName,false);
+		var token = retVal.split("|");
+		
+		if(token[1]=='ERR')
+		{
+			alert("Start Date is Invalid");
+			document.forms[0].startDate.value = "";
+			document.forms[0].startDate.focus();
+			return false;
+		}
+		
+		else
+		{
+			var Val=token[1];
+			if(Val == "")
+			{
+				document.forms[0].endDate.value = "";
+			}
+			else
+			{
+				document.forms[0].endDate_ui.value = Val;
+			}
+			document.forms[0].endDate_ui.value = Val;
+			document.forms[0].endDate.value = Val;
+		}
+	}
+	else
+	{
+			document.forms[0].startDate.value = "";
+			document.forms[0].endDate.value = "";
+			
+			document.forms[0].startDate.focus();
+	}
+}
+
+function endDateVal()
+{
+	var startDate = document.forms[0].startDate.value;
+	var endDate = document.forms[0].endDate.value;
+
+	if(endDate != "")
+	{
+		var input = "startDate|" + startDate + "|endDate|" +endDate;
+		var scrName = "climm_endDateValidation.scr";
+		var output = "";
+		var retVal = appFnExecuteScript(input,output,scrName,false);
+		var token = retVal.split("|");
+		
+		if(token[1]=='ERR')
+		{
+			alert("End Date is Invalid");
+			document.forms[0].endDate.value = "";
+			document.forms[0].endDate.focus();
+			return false;
+		}
+		
+		else
+		{
+			var Val=Number(token[1]);
+			if(Val >= 365)
+			{
+				alert("Policy End Date should be 1 year from Policy Start Date");
+				document.forms[0].endDate.focus();
+				document.forms[0].endDate.value="";
+				return false;
+			}
+			
+		}	
 	}
 }
 
@@ -74,10 +277,15 @@ function validateCredPeriod(obj)
 			obj.value="";
 			return false;
 		}
-		else
+		if(obj.value<0) 
 		{
-			return true;
+			alert("Credit Period should be a positive number");
+			obj.focus();
+			obj.value="";
+			return false;
 		}
+		return true;
+		
 	}
 	
 }
@@ -92,12 +300,12 @@ function removeThousandSeparator()
 	
 	if(!fnIsNull(crAmt1))
 	{				
-		document.forms[0].premiumAmt.value = parseInt(crAmt1.replace(/,/g,""));	
+		document.forms[0].premiumAmt.value = parseFloat(crAmt1.replace(/,/g,""));	
 	}
 	
 	if(!fnIsNull(crAmt2))
 	{				
-		document.forms[0].credAmt.value = parseInt(crAmt2.replace(/,/g,""));	
+		document.forms[0].credAmt.value = parseFloat(crAmt2.replace(/,/g,""));	
 	}
 	//if(!fnIsNull(crAmt3))
 	//{				
@@ -105,38 +313,67 @@ function removeThousandSeparator()
 	//}
 	if(!fnIsNull(crAmt4))
 	{				
-		document.forms[0].insAmt.value = parseInt(crAmt4.replace(/,/g,""));	
+		document.forms[0].insAmt.value = parseFloat(crAmt4.replace(/,/g,""));	
 	}
 	if(!fnIsNull(crAmt5))
 	{				
-		document.forms[0].comissionAmt.value = parseInt(crAmt5.replace(/,/g,""));	
+		document.forms[0].comissionAmt.value = parseFloat(crAmt5.replace(/,/g,""));	
 	}
 	
 }
 
 function climm_det_post_ONLOAD()
 {	
-	//fnlistInsCover();
-	loadCoverNoteInfo();
-	if(funcCode=="A")
+	if((funcCode=="A") || (funcCode=="N"))
 	{
-		//document.getElementById("credPeriod").disabled = true;
-		//document.getElementById("credAmt").disabled = true;
-		//document.getElementById("capAmt").disabled = false;
+		loadCoverNoteInfo();
+		if(insProvider == "SLFL ON CREDIT")
+		{
+			document.getElementById("credPeriod").disabled = false;
+			document.getElementById("credAmt").disabled = false;	
+		}
+		else
+		{
+			document.getElementById("credPeriod").disabled = true;
+			document.getElementById("credAmt").disabled = true;	
+			document.getElementById("credPeriod").value = 0;
+			document.getElementById("credAmt").value = 0.00;	
+		}
+	}
+	else if(funcCode=="M")
+	{
+		loadCoverTbl();
+		if(insProvider == "SLFL ON CREDIT")
+		{
+			document.getElementById("credPeriod").disabled = false;
+			document.getElementById("credAmt").disabled = false;	
+		}
+		else
+		{
+			document.getElementById("credPeriod").disabled = true;
+			document.getElementById("credAmt").disabled = true;	
+			document.getElementById("credPeriod").value = 0;
+			document.getElementById("credAmt").value = 0.00;
+		}
 		document.forms[0].policyType.value = "PERSONAL";
 	}
 	else if ((funcCode=="M") || (funcCode=="X") || (funcCode=="D") || (funcCode=="V")|| (funcCode=="I"))
 	{
 		//document.getElementById("credPeriod").disabled = true;
 		//document.getElementById("credAmt").disabled = true;
-		document.forms[0].premiumAmt.value=parseInt(document.forms[0].premiumAmt.value).toLocaleString();
-		document.forms[0].insAmt.value=parseInt(document.forms[0].insAmt.value).toLocaleString();
-		document.forms[0].comissionAmt.value=parseInt(document.forms[0].comissionAmt.value).toLocaleString();
+		document.forms[0].premiumAmt.value=parseFloat(document.forms[0].premiumAmt.value).toLocaleString();
+		document.forms[0].insAmt.value=parseFloat(document.forms[0].insAmt.value).toLocaleString();
+		document.forms[0].comissionAmt.value=parseFloat(document.forms[0].comissionAmt.value).toLocaleString();
 		loadCoverTbl();
 		
 		if((funcCode=="X") || (funcCode=="D") || (funcCode=="V") || (funcCode=="I"))
 		{
 			document.getElementById('l6potbl').disabled=true;
+			
+			hideImage("insNameImg");
+			hideImage("cal1");
+			hideImage("cal2");
+			hideImage("cal3");
 			
 		}
 		else
@@ -188,7 +425,7 @@ function loadCoverNoteInfo(){
 
 function loadCoverTbl()
 {
-	var input = "insId|"+insId;
+	var input = "insId|"+insId+"|funcCode|"+funcCode;
 	var scrName = "coverType_list.scr";
 	var output = "";
 	var retVal = appFnExecuteScript(input,output,scrName,false);
@@ -201,21 +438,41 @@ function loadCoverTbl()
 		
 	else
 	{
-		var Val2=token[1];
-		var count2=parseInt(token[5]);
+	
+		var Val2=token[5];
+		var Val1=token[1];
+		var count2=parseInt(token[7]);
 		var table2 = document.getElementById("l6potbl").value;
 		var ObjForm = document.forms[0];
 		var arr_coverType = Val2.split("!");
+		var arr_coverType2 = Val1.split("!");
 		for(var a=1;a<=count2;a++)
 		{
-			if(arr_coverType[a]=='Y')
-			{
-				document.getElementById("l6potbl").rows[a].cells[0].children[0].checked = true;
-			}
-			else
-			{
-				document.getElementById("l6potbl").rows[a].cells[0].children[0].checked = false;
-			}
+				var nextRowNum = document.getElementById("l6potbl").rows.length;	
+				var table = document.getElementById("l6potbl");
+				var row = table.insertRow(nextRowNum);	
+				row.className = "tr_1 tr_2";	
+				row.onclick = function () {fnTableOnClick(this.rowIndex);};
+				
+				var cell1 = row.insertCell(0);
+				var cell2 = row.insertCell(1);	
+								
+				var chkbox = document.createElement('input');
+				chkbox.type = "checkbox";
+				chkbox.id = "chkRelease" ;
+				chkbox.name = "chkRelease" ;
+				cell1.appendChild(chkbox);
+				
+				cell2.innerHTML =   arr_coverType[a];
+			
+				if(arr_coverType2[a]=='Y')
+				{
+					document.getElementById("l6potbl").rows[a].cells[0].children[0].checked = true;
+				}
+				else
+				{
+					document.getElementById("l6potbl").rows[a].cells[0].children[0].checked = false;
+				}
 		}
 	}
 	
@@ -299,7 +556,7 @@ function fnlistInsCover()
 		
 		if(token[1]=='ERR')
 		{
-			alert("Insuarance Cover Type not et up ");
+			alert("Insurance Cover Type not et up ");
 			document.forms[0].premiumAmt.value = "";
 			document.forms[0].premiumAmt.focus();
 			return false;
@@ -357,15 +614,18 @@ function insCoverChange()
 	
 }
 
-function comissionVal()
+function comissionVal(obj)
 {
 	setTSAmount(document.getElementById("premiumAmt"));
 	
+	
+	
 	var premiumAmt = parseFloat(document.getElementById("premiumAmt").value.replace(/,/g, ''));
-	if(premiumAmt != "")
+
+	if(premiumAmt > 0)
 	{
-		var input = "premiumAmt|" + premiumAmt;
-		var scrName = "climm_premiumAmt.scr";
+		var input = "premiumAmt|" + premiumAmt + "|insName|" + document.forms[0].insName.value;
+		var scrName = "climm_comissionAmt.scr";
 		var output = "";
 		var retVal = appFnExecuteScript(input,output,scrName,false);
 		var token = retVal.split("|");
@@ -381,7 +641,28 @@ function comissionVal()
 		else
 		{
 			var Val=token[1];
-			document.forms[0].comissionAmt.value = Number(Val).toLocaleString();
+			
+			if(!isNaN(Val )){
+				if(Number(Val)<0)
+				{
+					
+					Val=0;
+					
+				}
+				
+			}
+			else
+			{
+				Val = 0;
+			}
+			if(Val == "")
+			{
+				document.forms[0].comissionAmt.value = 0.00;
+			}
+			else
+			{
+				document.forms[0].comissionAmt.value = Number(Val).toLocaleString();
+			}
 			document.forms[0].premiumAmt.value = Number(premiumAmt).toLocaleString();
 			document.getElementById("comissionAmt").disabled = true;
 		}
@@ -393,9 +674,7 @@ function comissionVal()
 			
 			document.forms[0].premiumAmt.focus();
 	}
-	//fnValAmt1();
 }
-
 //function capVal()
 //{
 //	var value = 0.00;
@@ -418,35 +697,35 @@ function comissionVal()
 
 
 
-function setTSAmount(fielId)
-{
-        var amt1 = fielId.value.replace(/,/g, '');
-		
-		var regex  = /^\d+(?:\.\d{0,2})$/;		
-		if (regex.test(amt1))
-		{
-			amt1 = millionFormat(amt1);
-			if(!isNaN(amt1 )){
-					fielId.value = Number(amt1).toLocaleString();
-			}
-		}
-		else
-		{	
-			if(!isNaN(amt1 )){
-					fielId.value = Number(amt1).toLocaleString();
-			}
-			else
-			{
-				alert("Invalid amount");
-				fielId.value="0.00";
-				fielId.focus;
-			}
-			
-		}
-			
-
-		
-}
+//function setTSAmount(fielId)
+//{
+//        var amt1 = fielId.value.replace(/,/g, '');
+//		
+//		var regex  = /^\d+(?:\.\d{0,2})$/;		
+//		if (regex.test(amt1))
+//		{
+//			amt1 = millionFormat(amt1);
+//			if(!isNaN(amt1 )){
+//					fielId.value = Number(amt1).toLocaleString();
+//			}
+//		}
+//		else
+//		{	
+//			if(!isNaN(amt1 )){
+//					fielId.value = Number(amt1).toLocaleString();
+//			}
+//			else
+//			{
+//				alert("Invalid amount");
+//				fielId.value="0.00";
+//				fielId.focus;
+//			}
+//			
+//		}
+//			
+//
+//		
+//}
 
 function cifValidate(obj)
 {
@@ -478,4 +757,124 @@ function cifValidate(obj)
 	document.forms[0].cifId.focus();
 	}
 		
+}
+
+function fnInsCompanyList()
+{       
+	var strURL = "../custom/jsp/cifsegauddp003.jsp?";
+	strURL += "&pageTitle="     + encodeURIComponent("Insurance Comapany List");
+	strURL += "&fieldLiterals=" + encodeURIComponent("Insurance Company");
+	strURL += "&hyperLinkCols=" + "1";
+	strURL += "&inpNameValues=" + encodeURIComponent("assetGrpId|"+assetGrpId);
+	strURL += "&scrName="       + "climm_insNames.scr";
+	
+	var frm = document.forms[0];
+	var retVal;
+	var retVal = window.showModalDialog(strURL, null,"dialogWidth:50;dialogHeight:35;modal=yes,left=150,top=40,scrollbars=yes,toolbar=no,menubar=0");
+	
+	frm.insName.value = retVal[0]==null||retVal[0]=="undefined"?"":retVal[0];
+	//frm.cifId.value = retVal[0]==null||retVal[4]=="undefined"?"":retVal[4];
+	//frm.assetGrpId.value = retVal[0]==null||retVal[3]=="undefined"?"":retVal[3];
+	fnComissionPopulate();
+}
+
+function fnComissionPopulate()
+{
+	var insName = document.forms[0].insName.value.toUpperCase();
+	var premiumAmt = parseFloat(document.forms[0].premiumAmt.value.replace(/,/g,""));
+	if(cifId != "")
+	{
+		var input = "insName|" + insName + "|premiumAmt|" + premiumAmt;
+		var scrName = "climm_comissionAmt.scr";
+		var output = "";
+		var retVal = appFnExecuteScript(input,output,scrName,false);
+		var token = retVal.split("|");
+		if(token[1]=='ERR')
+		{
+		alert("Insurance Company is Invalid");
+		document.forms[0].insName.value = "";
+		document.forms[0].comissionAmt.value = "";
+		document.forms[0].comissionAmt.focus();
+		return false;
+		}
+		else
+		{
+			var Val=token[1].toUpperCase();;
+			if(Val == "NAN")
+			{
+				document.forms[0].comissionAmt.value = 0.00;
+			}
+			else
+			{
+				document.forms[0].comissionAmt.value = Number(Val).toLocaleString();
+			}
+			//document.forms[0].premiumAmt.value = Number(premiumAmt).toLocaleString();
+			document.getElementById("comissionAmt").disabled = true;
+		}
+	}
+	else
+	{
+	document.forms[0].cifId.value = "";
+	document.forms[0].custName.value = "";
+	document.forms[0].cifId.focus();
+	}
+	
+}
+
+
+function loadPercantage(obj)
+{
+	setTSAmount(obj);
+	if(parseFloat(obj.value.replace(/,/g,"")) >0)
+	{
+		var insAmt = millionFormat(obj.value.replace(/,/g,""));
+		
+		var input = "cifId|" + cifId + "|insAmt|" + insAmt + "|assetGrpId|" + assetGrpId + "|assetId|" + assetId;
+		var scrName = "climm_calcPercentage.scr";
+		var output = "";
+		var retVal = appFnExecuteScript(input,output,scrName,false);
+		var token = retVal.split("|");
+		if(token[1]=='ERR')
+		{
+		alert("Insurance Amount is Invalid");
+		document.forms[0].insAmt.value = "";
+		document.forms[0].insPercentage.value = "";
+		document.forms[0].insAmt.focus();
+		return false;
+		}
+		else
+		{
+			var Val=token[1];
+			
+			
+			if ((Val<token[5]) && (Val>token[7]))
+			{
+				alert("Sum Insurance Amount should be between "+token[5] +"% and " +token[7] +"%");
+				document.forms[0].insAmt.value = "";
+				document.forms[0].insPercentage.value = "";
+				document.forms[0].insAmt.focus();
+				return false;
+			}
+			var Val2=token[3].toUpperCase();
+			if(Val2 == "NAN")
+			{
+				document.forms[0].insPercentage.value = "0.00%";
+				document.forms[0].insAmt.value = 0.00;
+			}
+			else
+			{
+				insPercentage = parseFloat(Val).toFixed(2);
+				document.forms[0].insPercentage.value = insPercentage.concat("%");
+				document.forms[0].insAmt.value = token[3];
+			}
+			document.forms[0].insAmt.value = parseFloat(insAmt).toLocaleString();
+			document.getElementById("insAmt").disabled = false;
+		}
+	}
+	else
+	{
+		document.forms[0].insAmt.value = 0.00;
+		document.forms[0].insPercentage.value = "0%";
+		document.forms[0].insAmt.focus();
+	}	
 }

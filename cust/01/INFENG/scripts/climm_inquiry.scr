@@ -39,13 +39,39 @@ sv_r = urhk_B2K_printRepos("BANCS")
 	
 	CUST.CLIMM.assetGrpId = BANCS.INPUT.assetGrpId
 	print(CUST.CLIMM.assetGrpId)
+	
+	CUST.CLIMM.term = BANCS.INPUT.term
+	print(CUST.CLIMM.term)
+	
+	if(CUST.CLIMM.insProvider == "BY SLFL") THEN
+		CUST.CLIMM.insProviderTxt = "BY SFP"
+	ENDIF
+	
+	if(CUST.CLIMM.insProvider == "SLFL ON CREDIT") THEN
+		CUST.CLIMM.insProviderTxt = "SFP ON CREDIT"
+	ENDIF
+	
+	if(CUST.CLIMM.insProvider == "DIRECT BY APPLICANT ON CREDIT") THEN
+		CUST.CLIMM.insProviderTxt = "DIRECT BY APPLICANT ON CREDIT"
+	ENDIF
+	
+	if(CUST.CLIMM.insProvider == "EXISTING SLF") THEN
+		CUST.CLIMM.insProviderTxt = "EXISTING SFP"
+	ENDIF
+	
+	if(CUST.CLIMM.insProvider == "DIRECT INSURANCE PAID") THEN
+		CUST.CLIMM.insProviderTxt = "DIRECT INSURANCE PAID"
+	ENDIF
+	if(CUST.CLIMM.insProvider == "FREE INSURANCE GIVEN BY SALE") THEN
+		CUST.CLIMM.insProviderTxt = "FREE INSURANCE GIVEN BY SALE"
+	ENDIF
 
 	IF (CUST.CLIMM.funcCode=="I") THEN
 	#{
 		sv_q = "countData|"
 		sv_q = sv_q + "select count(*) from custom.CIMM_TBL"
-		sv_q = sv_q + " where cif_id= '" +CUST.CLIMM.cifId+ "' and asset_id = '" +CUST.CLIMM.assetId+ "' and ins_id = '" + CUST.CLIMM.insId + "' and ins_done_by= '" + CUST.CLIMM.insProvider + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' and del_flg = 'N' " 
-		sv_q = sv_q +" and entity_cre_flg ='Y' "
+		sv_q = sv_q + " where cif_id= '" +CUST.CLIMM.cifId+ "' and asset_id = '" +CUST.CLIMM.assetId+ "' and ins_id = '" + CUST.CLIMM.insId + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' and del_flg = 'N' " 
+		sv_q = sv_q +" and entity_cre_flg ='Y' and ins_id = '" + CUST.CLIMM.insId + "' "
 		PRINT(sv_q)
 	
 		sv_z = urhk_dbSelectWithBind(sv_q)
@@ -96,13 +122,13 @@ sv_r = urhk_B2K_printRepos("BANCS")
 					
 					PRINT(CUST.CLIMM.policyDescA)
 					sv_c = "policyDescA|" + CUST.CLIMM.policyDescA
-					sv_y = urhk_SetOrbOut(sv_c)
+					sv_y = urhk_SetOrbOut(sv_c + " ")
 					print(sv_y)
 					
-				sv_r = "insPolicyNo,insName,policyType,startDate,endDate,noteNo,expiryDate,premiumAmt,credAmt,insAmt,comissionAmt,credPeriod,created_by|"
-				sv_r = sv_r + "select ins_policy_no,ins_company,policy_type,to_char(policy_start_date,'dd-mm-yyyy'),to_char(policy_end_date,'dd-mm-yyyy'),cover_note_no,to_char(cover_note_exp_date,'dd-mm-yyyy'),premium_amt,ins_cr_amt,ins_amt,comission_amt,capitalized_amt,cr_period,lchg_user_id "
-				sv_r = sv_r + "from custom.CIMM_TBL where cif_id= '" +CUST.CLIMM.cifId+ "' and asset_id = '" +CUST.CLIMM.assetId+ "' and ins_id = '" + CUST.CLIMM.insId + "' and ins_done_by= '" + CUST.CLIMM.insProvider + "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' "
-				sv_r = sv_r + "  and del_flg = 'N' and entity_cre_flg = 'Y'"
+				sv_r = "insPolicyNo,insName,policyType,startDate,endDate,noteNo,expiryDate,premiumAmt,credAmt,insAmt,comissionAmt,capAmt,credPeriod, created_by|"
+				sv_r = sv_r + "select ins_policy_no,ins_company,policy_type,to_char(policy_start_date,'dd-mm-yyyy'),to_char(policy_end_date,'dd-mm-yyyy'),cover_note_no,to_char(cover_note_exp_date,'dd-mm-yyyy'),premium_amt,ins_cr_amt,ins_amt,comission_amt,capitalized_amt,cr_period,rcre_user_id "
+				sv_r = sv_r + "from custom.CIMM_TBL where cif_id= '" +CUST.CLIMM.cifId+ "' and asset_id = '" +CUST.CLIMM.assetId+ "' and asset_grp_id='" + CUST.CLIMM.assetGrpId + "' "
+				sv_r = sv_r + "  and entity_cre_flg = 'Y' and srl_num='"+CUST.CLIMM.term+"' and ins_id = '" + CUST.CLIMM.insId + "' "
 				print(sv_r)
 				
 				sv_z = urhk_dbSelectWithBind(sv_r)
@@ -153,58 +179,59 @@ sv_r = urhk_B2K_printRepos("BANCS")
 					CUST.CLIMM.created_by = BANCS.OUTPARAM.created_by
 					print(CUST.CLIMM.created_by)
 					
-					lv_b=urhk_SetOrbOut("SuccessOrFailure|Y")
+					lv_b=urhk_SetOrbOut("SuccessOrFailure|Y" + " ")
+					lv_b=urhk_SetOrbOut("insProviderTxt|" + CUST.CLIMM.insProviderTxt + " ")
 					
 					sv_c = "insPolicyNo|" + CUST.CLIMM.insPolicyNo
-					sv_y = urhk_SetOrbOut(sv_c + " ")
+					sv_y = urhk_SetOrbOut(sv_c + " " + " ")
 					print(sv_y)
 					
 					sv_c = "insName|" + CUST.CLIMM.insName
-					sv_y = urhk_SetOrbOut(sv_c + " ")
+					sv_y = urhk_SetOrbOut(sv_c + " " + " ")
 					print(sv_y)
 					
 					sv_c = "policyType|" + CUST.CLIMM.policyType
-					sv_y = urhk_SetOrbOut(sv_c + " ")
+					sv_y = urhk_SetOrbOut(sv_c + " " + " ")
 					print(sv_y)
 					
 					sv_c = "startDate|" + CUST.CLIMM.startDate
-					sv_y = urhk_SetOrbOut(sv_c + " ")
+					sv_y = urhk_SetOrbOut(sv_c + " " + " ")
 					print(sv_y)
 					
 					sv_c = "endDate|" + CUST.CLIMM.endDate
-					sv_y = urhk_SetOrbOut(sv_c + " ")
+					sv_y = urhk_SetOrbOut(sv_c + " " + " ")
 					print(sv_y)
 					
 					sv_c = "noteNo|" + CUST.CLIMM.noteNo
-					sv_y = urhk_SetOrbOut(sv_c + " ")
+					sv_y = urhk_SetOrbOut(sv_c + " " + " ")
 					print(sv_y)
 					
 					sv_c = "expiryDate|" + CUST.CLIMM.expiryDate
-					sv_y = urhk_SetOrbOut(sv_c + " ")
+					sv_y = urhk_SetOrbOut(sv_c + " " + " ")
 					print(sv_y)
 
 					sv_c = "premiumAmt|" + CUST.CLIMM.premiumAmt
-					sv_y = urhk_SetOrbOut(sv_c + " ")
+					sv_y = urhk_SetOrbOut(sv_c + " " + " ")
 					print(sv_y)
 					
 					sv_c = "credAmt|" + CUST.CLIMM.credAmt
-					sv_y = urhk_SetOrbOut(sv_c + " ")
+					sv_y = urhk_SetOrbOut(sv_c + " " + " ")
 					print(sv_y)
 					
 					sv_c = "insAmt|" + CUST.CLIMM.insAmt
-					sv_y = urhk_SetOrbOut(sv_c + " ")
+					sv_y = urhk_SetOrbOut(sv_c + " " + " ")
 					print(sv_y)
 					
 					sv_c = "comissionAmt|" + CUST.CLIMM.comissionAmt
-					sv_y = urhk_SetOrbOut(sv_c + " ")
+					sv_y = urhk_SetOrbOut(sv_c + " " + " ")
 					print(sv_y)
 					
 					#sv_c = "capAmt|" + CUST.CLIMM.capAmt
-					#sv_y = urhk_SetOrbOut(sv_c + " ")
+					#sv_y = urhk_SetOrbOut(sv_c + " " + " ")
 					#print(sv_y)
 					
 					sv_c = "credPeriod|" + CUST.CLIMM.credPeriod
-					sv_y = urhk_SetOrbOut(sv_c + " ")
+					sv_y = urhk_SetOrbOut(sv_c + " " + " ")
 					print(sv_y)
 					
 					GOTO ENDOFSCRIPT	
@@ -213,7 +240,7 @@ sv_r = urhk_B2K_printRepos("BANCS")
 				#{
 					
 						lv_b = urhk_SetOrbErr("Query execution failed")
-						lv_b=urhk_SetOrbOut("SuccessOrFailure|N")
+						lv_b=urhk_SetOrbOut("SuccessOrFailure|N" + " ")
 						GOTO ENDOFSCRIPT
 				#}
 				ENDIF
@@ -221,7 +248,7 @@ sv_r = urhk_B2K_printRepos("BANCS")
 			ELSE
 			#{
 				lv_b = urhk_SetOrbErr("Nothing to Inquire")
-				lv_b=urhk_SetOrbOut("SuccessOrFailure|N")
+				lv_b=urhk_SetOrbOut("SuccessOrFailure|N" + " ")
 				GOTO ENDOFSCRIPT
 			#}
 			ENDIF
@@ -230,7 +257,7 @@ sv_r = urhk_B2K_printRepos("BANCS")
 		#{
 		
 			lv_b = urhk_SetOrbErr("Query execution failed")
-			lv_b=urhk_SetOrbOut("SuccessOrFailure|N")
+			lv_b=urhk_SetOrbOut("SuccessOrFailure|N" + " ")
 			GOTO ENDOFSCRIPT
 		#}
 		ENDIF	
@@ -240,7 +267,7 @@ sv_r = urhk_B2K_printRepos("BANCS")
 ENDOFSCRIPT:
 
 		sv_z = "SuccessOrFailure|Y"
-		sv_u = urhk_SetOrbOut(sv_z)
+		sv_u = urhk_SetOrbOut(sv_z + " ")
 		
 exitscript
 

@@ -46,7 +46,27 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 	#{	
 	
 		sv_a = ""
-		sv_a = sv_a + "delete CUSTOM.CIMM_COVER_MOD where ins_id='"+CUST.CLIMM.insId+"' "
+		sv_a = sv_a + "srl| select max(srl_num) from  CUSTOM.CIMM_COVER_MOD where ins_id='"+CUST.CLIMM.insId+"' "
+		print(sv_a)
+				
+		sv_b = urhk_dbSelectWithBind(sv_a)
+		print(sv_b)
+		
+		IF(sv_b != 0) THEN
+		#{
+			CUST.CLIMM.isError = "Y"
+			CUST.CLIMM.errMsg = "Query Exection Failed"
+			GOTO ENDOFSCRIPT
+		#}
+		ELSE
+		#{
+			CUST.CLIMM.isError = "N"
+			CUST.CLIMM.srl = BANCS.OUTPARAM.srl
+		#}
+		ENDIF
+	
+		sv_a = ""
+		sv_a = sv_a + "delete CUSTOM.CIMM_COVER_MOD where ins_id='"+CUST.CLIMM.insId+"' and srl_num=(select max(srl_num) from custom.cimm_cover_mod where ins_id='"+CUST.CLIMM.insId+"') "
 		print(sv_a)
 				
 		sv_b = urhk_dbSqlWithBind(sv_a)
@@ -56,6 +76,7 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 		#{
 			CUST.CLIMM.isError = "Y"
 			CUST.CLIMM.errMsg = "Insertion failed for the COVER table"
+			GOTO ENDOFSCRIPT
 		#}
 		ELSE
 		#{
@@ -88,7 +109,7 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 		sv_a = sv_a + "values("
 		sv_a = sv_a + "'"+CUST.CLIMM.insId+"',"		
 		sv_a = sv_a + "'"+CUST.CLIMM.policyDesc+"',"	
-		sv_a = sv_a + "'"+CUST.CLIMM.chekVal+"') "
+		sv_a = sv_a + "'"+CUST.CLIMM.chekVal+"','Y','"+CUST.CLIMM.srl+"') "
 		print(sv_a)
 				
 		sv_b = urhk_dbSqlWithBind(sv_a)
@@ -98,6 +119,7 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 		#{
 			CUST.CLIMM.isError = "Y"
 			CUST.CLIMM.errMsg = "Insertion failed for the COVER table"
+			GOTO ENDOFSCRIPT
 		#}
 		ELSE
 		#{

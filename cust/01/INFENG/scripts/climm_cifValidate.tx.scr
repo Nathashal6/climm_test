@@ -54,14 +54,14 @@ PRINT(sv_b)
 CUST.CLIMM.CustName = BANCS.OUTPARAM.CustName
 print(CUST.CLIMM.CustName)
 sv_u = "msg1|"+ CUST.CLIMM.CustName
-sv_z = urhk_SetOrbOut(sv_u)
+sv_z = urhk_SetOrbOut(sv_u + " ")
 print(sv_z)
 GOTO ENDOFSCRIPT
 #}
 else
 #{
 sv_u = "msg1|ERR" 
-sv_z = urhk_SetOrbOut(sv_u)
+sv_z = urhk_SetOrbOut(sv_u + " ")
 print(sv_z)
 GOTO ENDOFSCRIPT
 #}

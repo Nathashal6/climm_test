@@ -33,28 +33,21 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 	sv_s = urhk_B2k_printRepos("BANCS")
 	PRINT(sv_s)
 
-	CUST.CLIMM.funcCode = BANCS.INPUT.funcCode
-	CUST.CLIMM.chekValA = BANCS.INPUT.chekValA
-	print(CUST.CLIMM.chekValA)
+	#CUST.CLIMM.funcCode = BANCS.INPUT.funcCode
+	#CUST.CLIMM.chekValA = BANCS.INPUT.chekValA
+	#print(CUST.CLIMM.chekValA)
+	#CUST.CLIMM.policyDescA = BANCS.INPUT.policyDescA
+	#print(CUST.CLIMM.policyDescA)
+	#CUST.CLIMM.srl = BANCS.INPUT.term
+	#print(CUST.CLIMM.srl)
 	
 	
 	IF (CUST.CLIMM.funcCode=="X") THEN
 	#{	
-			sv_x = 1
-			CUST.CLIMM.txtRecCount = BANCS.INPUT.insCover2
-			print(CUST.CLIMM.txtRecCount)
-	
-		WHILE(sv_x < CUST.CLIMM.txtRecCount)
-		#{
-		sv_q = GETPOSITION(CUST.CLIMM.chekValA,"!")
-		CUST.CLIMM.chekVal=  MID$(CUST.CLIMM.chekValA, 0 ,sv_q - 1)
-		PRINT(CUST.CLIMM.chekVal)
-		CUST.CLIMM.chekValA = MID$(CUST.CLIMM.chekValA,sv_q,STRLEN(CUST.CLIMM.chekValA))
-		PRINT(CUST.CLIMM.chekValA)
 
 		sv_a = ""
 		sv_a = sv_a + "delete CUSTOM.CIMM_COVER_MOD "
-		sv_a = sv_a + "WHERE ins_id = '"+CUST.CLIMM.insId+"' "	
+		sv_a = sv_a + "WHERE ins_id = '"+CUST.CLIMM.insId+"' and srl_num= (select max(srl_num) from custom.cimm_cover_mod where ins_id='"+CUST.CLIMM.insId+"') "	
 		print(sv_a)
 				
 		sv_b = urhk_dbSqlWithBind(sv_a)
@@ -72,11 +65,6 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 		#}
 		ENDIF
 
-		ENDOFLOOP:
-		
-		sv_x = sv_x + 1
-	#}
-	DO
 	#}
 	ENDIF
 	

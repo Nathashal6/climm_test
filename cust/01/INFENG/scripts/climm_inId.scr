@@ -15,17 +15,20 @@
 	sv_a = urhk_B2K_printRepos("BANCS")
 	
 	CUST.CLIMM.recCount = "0"
-	CUST.CLIMM.insId = BANCS.INPUT.insId
-	print(CUST.CLIMM.insId)
+	CUST.CLIMM.assetId = BANCS.INPUT.assetId
+	print(CUST.CLIMM.assetId)
 	
-	CUST.CLIMM.cif_id	= ""
+	CUST.CLIMM.funcCode	= BANCS.INPUT.funcCode
+	print(CUST.CLIMM.funcCode)
 	CUST.CLIMM.asset_grp_id = ""
 	CUST.CLIMM.asset_id	= ""
 	CUST.CLIMM.ins_done_by = ""
 	
+	if((CUST.CLIMM.funcCode == "M") or (CUST.CLIMM.funcCode == "V")) then
+	#{
 	#get Rec Count
 	sv_a = ""
-	sv_a = sv_a + "recCount|select count(*) from custom.cimm_mod_tbl where ins_id='" + CUST.CLIMM.insId + "' and del_flg='N' "
+	sv_a = sv_a + "recCount|select count(*) from custom.cimm_mod_tbl where asset_id='" + CUST.CLIMM.assetId + "' and del_flg='N' and cif_id='" + CUST.CLIMM.cifId + "' "
 	PRINT(sv_a)
 	
 	sv_b = urhk_dbSelectWithBind(sv_a)
@@ -38,9 +41,9 @@
 	
 	IF(CUST.CLIMM.recCount != "0") THEN
 	#{
-		sv_a =  "cif_id,asset_grp_id,asset_id,ins_done_by| "
-		sv_a = sv_a + "select cif_id,asset_grp_id,asset_id,ins_done_by from custom.cimm_mod_tbl   "
-		sv_a = sv_a + " where cimm_mod_tbl.ins_id='"+ CUST.CLIMM.insId +"' and del_flg='N' "
+		sv_a =  "ins_id,ins_done_by| "
+		sv_a = sv_a + "select ins_id,ins_done_by from custom.cimm_mod_tbl   "
+		sv_a = sv_a + " where cimm_mod_tbl.asset_id='"+ CUST.CLIMM.assetId +"' and del_flg='N' and cif_id='" + CUST.CLIMM.cifId + "' "
 		PRINT(sv_a)
 		
 		sv_b = urhk_dbSelectWithBind(sv_a)
@@ -48,47 +51,100 @@
 		
 		IF(sv_b==0) then
 		#{
-			CUST.CLIMM.cif_id	= BANCS.OUTPARAM.cif_id
-			print(CUST.CLIMM.cif_id)
-			CUST.CLIMM.asset_grp_id	= BANCS.OUTPARAM.asset_grp_id
-			CUST.CLIMM.asset_id	= BANCS.OUTPARAM.asset_id
+			#CUST.CLIMM.cif_id	= BANCS.OUTPARAM.cif_id
+			#print(CUST.CLIMM.cif_id)
+			#CUST.CLIMM.asset_grp_id	= BANCS.OUTPARAM.asset_grp_id
+			CUST.CLIMM.ins_id	= BANCS.OUTPARAM.ins_id
 			CUST.CLIMM.ins_done_by   = BANCS.OUTPARAM.ins_done_by
 			
 			
-			sv_c = "msg1|" + CUST.CLIMM.cif_id
-			sv_d = urhk_SetOrbOut(sv_c)
+			sv_c = "msg1|" + CUST.CLIMM.ins_id
+			sv_d = urhk_SetOrbOut(sv_c + " ")
 			print(sv_d)
 			
-			sv_c = "msg2|" + CUST.CLIMM.asset_grp_id
-			sv_d = urhk_SetOrbOut(sv_c)
-			print(sv_d)
-			
-			sv_c = "msg3|" + CUST.CLIMM.asset_id
-			sv_d = urhk_SetOrbOut(sv_c)
-			print(sv_d)
-			
-			sv_c = "msg4|" + CUST.CLIMM.ins_done_by
-			sv_d = urhk_SetOrbOut(sv_c)
+			sv_c = "msg2|" + CUST.CLIMM.ins_done_by
+			sv_d = urhk_SetOrbOut(sv_c + " ")
 			print(sv_d)
 		#}
 		ELSE
 		#{
-			CUST.CLIMM.cif_id	= "ERR"
+			CUST.CLIMM.ins_id	= "ERR"
 			sv_c = "msg1|ERR "
-			sv_d = urhk_SetOrbOut(sv_c)
+			sv_d = urhk_SetOrbOut(sv_c + " ")
+			print(sv_d)
+		#}
+		ENDIF
+		#}
+		else
+		#{
+			CUST.CLIMM.ins_id	= "ERR"
+			sv_c = "msg1|ERR "
+			sv_d = urhk_SetOrbOut(sv_c + " ")
+			print(sv_d)
+		#}
+		endif
+	#}
+	else
+	#{
+		#get Rec Count
+	sv_a = ""
+	sv_a = sv_a + "recCount|select count(*) from custom.cimm_tbl where asset_id='" + CUST.CLIMM.assetId + "' and del_flg='N' and cif_id='" + CUST.CLIMM.cifId + "' "
+	PRINT(sv_a)
+	
+	sv_b = urhk_dbSelectWithBind(sv_a)
+	PRINT(sv_b)
+	IF(sv_b == 0) THEN
+	#{
+		CUST.CLIMM.recCount = BANCS.OUTPARAM.recCount
+	#}
+	ENDIF
+	
+	IF(CUST.CLIMM.recCount != "0") THEN
+	#{
+		sv_a =  "ins_id,ins_done_by| "
+		sv_a = sv_a + "select ins_id,ins_done_by from custom.cimm_tbl   "
+		sv_a = sv_a + " where cimm_tbl.asset_id='"+ CUST.CLIMM.assetId +"' and del_flg='N' and cif_id='" + CUST.CLIMM.cifId + "' "
+		PRINT(sv_a)
+		
+		sv_b = urhk_dbSelectWithBind(sv_a)
+		PRINT(sv_b)
+		
+		IF(sv_b==0) then
+		#{
+			#CUST.CLIMM.cif_id	= BANCS.OUTPARAM.cif_id
+			#print(CUST.CLIMM.cif_id)
+			#CUST.CLIMM.asset_grp_id	= BANCS.OUTPARAM.asset_grp_id
+			CUST.CLIMM.ins_id	= BANCS.OUTPARAM.ins_id
+			CUST.CLIMM.ins_done_by   = BANCS.OUTPARAM.ins_done_by
+			
+			
+			sv_c = "msg1|" + CUST.CLIMM.ins_id
+			sv_d = urhk_SetOrbOut(sv_c + " ")
+			print(sv_d)
+			
+			sv_c = "msg2|" + CUST.CLIMM.ins_done_by
+			sv_d = urhk_SetOrbOut(sv_c + " ")
+			print(sv_d)
+		#}
+		ELSE
+		#{
+			CUST.CLIMM.ins_id	= "ERR"
+			sv_c = "msg1|ERR "
+			sv_d = urhk_SetOrbOut(sv_c + " ")
 			print(sv_d)
 		#}
 		ENDIF
 	#}
 	else
 	#{
-		CUST.CLIMM.cif_id	= "ERR"
+		CUST.CLIMM.ins_id	= "ERR"
 		sv_c = "msg1|ERR "
-		sv_d = urhk_SetOrbOut(sv_c)
+		sv_d = urhk_SetOrbOut(sv_c + " ")
 		print(sv_d)
 	#}
 	ENDIF
-
+	#}
+	endif
 	
 	EXITSCRIPT
 	

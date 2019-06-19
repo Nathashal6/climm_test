@@ -1,6 +1,6 @@
 function printBlock()
 {
-	writeCustomHeader("custrpt_res");
+	writeCustomHeader("climm_res");
 	with (document){
 	write('<table border="0" cellspacing="0" cellpadding="0" class="ctable">');
 	write('<tr>');
@@ -54,8 +54,8 @@ function printBlock()
 function printFooterBlock()
 {
 	with (document) {
-	write('<div class="ctable">');
-	write('<input id="Ok" name="Ok" type="button" class="button" value="' + jspResArr.get("FLTCLSP16") + '"	onClick="javascript:return custrpt_res_ONCLICK1(this);"" hotKeyId="Go">');
+	write('<div class="ctable custom-buttons button-wrapper-fixed">');
+	write('<input id="Ok" name="Ok" type="button" class="button" value="' + jspResArr.get("FLTCLSP16") + '"	onClick="javascript:return climm_res_ONCLICK1(this);"" hotKeyId="Go">');
 	writeFooter();
 	write('</div>');
 	}
@@ -63,16 +63,16 @@ function printFooterBlock()
 
 
 
-function custrpt_res_ONCLICK1(obj)
+function climm_res_ONCLICK1(obj)
 {
 	var retVal = "";
-	if (preEventCall('custrpt_res',obj,'ONCLICK') == false) { 
+	if (preEventCall('climm_res',obj,'ONCLICK') == false) { 
 		return false;
 	}
 	if ((retVal = fnLastButtonClick()) == false) {
 		return false;
 	}
-	if (postEventCall('custrpt_res',obj,'ONCLICK') == false) { 
+	if (postEventCall('climm_res',obj,'ONCLICK') == false) { 
 		return false;
 	}
 	return (retVal == undefined) ? true : retVal;

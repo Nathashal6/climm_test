@@ -1,0 +1,162 @@
+MPORTANT: Auto Generated Header. DO NOT CHANGE MANUALLY.
+# Product: Finacle Core
+# Category: User Defined
+# Script: pico_cifValidate.scr
+# Type: NA|default
+# Description: These types of scripts do not belong to any particular category and are standalone scripts with no script specific repositories or fields.
+# Author: 
+# Date: 4/24/14 9:45 AM
+# Modification Log:
+#============================================================
+#This script is use to populate informations of DR acct
+#SOL ,CCY,Account name
+<--START
+CHECKSUM="ba8be811f5077be45f410d6ec703fc23978fe673ea97737556480b1f42d87470"
+	# Script body goes here
+	TRACE ON
+	
+	IF (REPEXISTS("CUST") == 0) THEN
+	#{
+		CREATEREP("CUST")
+	#}
+	ENDIF
+	IF (CLASSEXISTS("CUST", "CLIMM") == 0) THEN
+	#{
+		CREATECLASS("CUST", "CLIMM", 5)
+	#}
+	ENDIF
+	
+	lv_r = urhk_b2k_printRepos("BANCS")
+	print(lv_r)
+	
+	CUST.CLIMM.insAmt = BANCS.INPUT.insAmt
+	print(CUST.CLIMM.insAmt)
+	CUST.CLIMM.cifId = BANCS.INPUT.cifId
+	print(CUST.CLIMM.cifId)
+	CUST.CLIMM.assetGrpId = BANCS.INPUT.assetGrpId
+	print(CUST.CLIMM.assetGrpId)
+	
+	
+	IF(BANCS.INPUT.assetId !="") THEN
+	#{
+			CUST.CLIMM.assetId = BANCS.INPUT.assetId
+	#}
+	ELSE
+	#{
+			CUST.CLIMM.assetId = ""
+	#}
+	ENDIF
+	
+	print (CUST.CLIMM.assetId)
+	CUST.CLIMM.recCount = 0
+	
+
+		sv_a = ""
+		sv_a = sv_a + "valuationAmt|select valuation_amt from custom.lagm,custom.lamm "
+		sv_a = sv_a + "where asset_id = '" +CUST.CLIMM.assetId+ "' and lamm.asst_group_id='" + CUST.CLIMM.assetGrpId + "' "
+		sv_a = sv_a + "  and lagm.del_flg = 'N' and lagm.entity_cre_flg = 'Y' and cif_id='" + CUST.CLIMM.cifId + "' and lagm.asst_group_id=lamm.asst_group_id "
+		print(sv_a)
+		
+		sv_b = urhk_dbSelectWithBind(sv_a)
+		PRINT(sv_b)
+
+		IF(sv_b==0) then
+		#{
+			CUST.CLIMM.valuationAmt = BANCS.OUTPARAM.valuationAmt
+			print(CUST.CLIMM.valuationAmt)
+
+			if((CUST.CLIMM.insAmt != 0) and (CUST.CLIMM.insAmt != "NaN")) then
+			#{
+				CUST.CLIMM.insPercentage = cdouble(CUST.CLIMM.insAmt) / cdouble(CUST.CLIMM.valuationAmt)*100.00
+				print(CUST.CLIMM.insPercentage)
+				sv_a = "insPercentage | select round('"+CUST.CLIMM.insPercentage+"',2) from dual"
+				print (sv_a)
+				sv_b = urhk_dbSelectWithBind(sv_a)
+				IF(sv_b==0) then
+				#{
+					CUST.CLIMM.insPercentage = BANCS.OUTPARAM.insPercentage
+					print(CUST.CLIMM.insPercentage)
+				#}
+				endif
+			#}
+			else
+			#{
+				CUST.CLIMM.insAmt = 0.00
+				CUST.CLIMM.insPercentage = 0.00
+			#}
+			endif
+			sv_s ="min | select to_number(to_char(variable_value,'990.90')) from custom.c_svrsetvar where module_name ='INSURANCE' and sub_module_name ='CIMM' and variable_name ='MIN'"
+			print (sv_s)
+			sv_b = urhk_dbSelectWithBind(sv_s)
+			PRINT(sv_b)
+			IF(sv_b==0) then
+			#{
+				CUST.CLIMM.min = BANCS.OUTPARAM.min
+				print(CUST.CLIMM.min)
+			#}
+			else 
+			#{
+				CUST.CLIMM.min = "0"
+			#}
+			ENDIF
+			sv_s ="max | select to_number(to_char(variable_value,'990.90')) from custom.c_svrsetvar where module_name ='INSURANCE' and sub_module_name ='CIMM' and variable_name ='MAX'"
+			print (sv_s)
+			sv_b = urhk_dbSelectWithBind(sv_s)
+			PRINT(sv_b)
+			IF(sv_b==0) then
+			#{
+				CUST.CLIMM.max = BANCS.OUTPARAM.max
+				print(CUST.CLIMM.max)
+			#}
+			else
+			#{
+				CUST.CLIMM.max = "0"
+			#}
+			ENDIF
+			print (CUST.CLIMM.insPercentage)
+			print (CUST.CLIMM.max)
+			print (CUST.CLIMM.min)
+			
+		IF(sv_b==0) then
+		#{
+			
+			CUST.CLIMM.insPercentage1 = CUST.CLIMM.insPercentage + "%"
+			print(CUST.CLIMM.insPercentage1)
+		#}
+		else
+		#{
+			CUST.CLIMM.insPercentage1 = "ERR"
+			print(CUST.CLIMM.insPercentage)
+		#}
+		endif
+		
+		sv_u = "msg1|"+ CUST.CLIMM.insPercentage1
+		print(sv_u)
+		sv_z = urhk_SetOrbOut(sv_u + " ")
+		print(sv_z)
+		
+		sv_u = "msg2|"+ CUST.CLIMM.insAmt
+		print(sv_u)
+		sv_z = urhk_SetOrbOut(sv_u + " ")
+		print(sv_z)
+		
+		sv_u = "msg3|"+ CUST.CLIMM.min
+		print(sv_u)
+		sv_z = urhk_SetOrbOut(sv_u + " ")
+		print(sv_z)
+		
+		sv_u = "msg4|"+ CUST.CLIMM.max
+		print(sv_u)
+		sv_z = urhk_SetOrbOut(sv_u + " ")
+		print(sv_z)
+		
+		GOTO ENDOFSCRIPT	
+	
+	
+	ENDOFSCRIPT:
+		
+		#EXITSCRIPT
+		
+		TRACE OFF
+END-->
+

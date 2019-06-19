@@ -28,33 +28,46 @@ CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
 	sv_a = urhk_B2K_printRepos("BANCS")
 	
 	CUST.CLIMM.recCount = "0"
-	CUST.CLIMM.assetGrpId = BANCS.INPUT.assetGrpId
-	print(CUST.CLIMM.assetGrpId)
-	
-		sv_a =  "cif_id| "
-		sv_a = sv_a + "select distinct cif_id from custom.lamm where del_flg='N' and asst_group_id='"+ CUST.CLIMM.assetGrpId +"' "
-		PRINT(sv_a)
-		
-		sv_b = urhk_dbSelectWithBind(sv_a)
-		PRINT(sv_b)
-		
-		IF(sv_b == 0) THEN
-		#{
-				CUST.CLIMM.cif_id	= BANCS.OUTPARAM.cif_id
-	
-		#}
-		ELSE
-		#{
-			CUST.CLIMM.cif_id = "ERR"
-		#}
-		ENDIF
-		
-		sv_u = "cifId|"+CUST.CLIMM.cif_id
-		sv_v = urhk_SetOrbOut(sv_u + " ")
-
-
+	CUST.CLIMM.startDate = BANCS.INPUT.startDate
+	print(CUST.CLIMM.startDate)
 	
 	
+	#get Rec Count
+	sv_a = ""
+	sv_a = sv_a + "endDate1|select to_char((to_date('" + CUST.CLIMM.startDate + "') + interval '12 months'),'dd-mm-yyyy') "
+	PRINT(sv_a)
+	
+	sv_b = urhk_dbSelectWithBind(sv_a)
+	PRINT(sv_b)
+	IF(sv_b == 0) THEN
+	#{
+		CUST.CLIMM.endDate1 = BANCS.OUTPARAM.endDate1
+	#}
+	else
+	#{
+		CUST.CLIMM.endDate1 = "ERR"
+	#}
+	ENDIF
+	
+	sv_a = ""
+	sv_a = sv_a + "endDate|select to_char((to_date('" + CUST.CLIMM.endDate1 + "') - interval '1 day'),'dd-mm-yyyy') "
+	PRINT(sv_a)
+	
+	sv_b = urhk_dbSelectWithBind(sv_a)
+	PRINT(sv_b)
+	IF(sv_b == 0) THEN
+	#{
+		CUST.CLIMM.endDate = BANCS.OUTPARAM.endDate
+	#}
+	else
+	#{
+		CUST.CLIMM.endDate = "ERR"
+	#}
+	ENDIF
+	
+	sv_u = "msg1|"+ CUST.CLIMM.endDate
+	sv_z = urhk_SetOrbOut(sv_u + " ")
+	print(sv_z)
 	
 	EXITSCRIPT
 	

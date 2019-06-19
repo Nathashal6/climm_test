@@ -40,32 +40,12 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 	print(CUST.CLIMM.policyDescA)
 	
 	
-	IF (CUST.CLIMM.funcCode=="N") THEN
+	IF (CUST.CLIMM.funcCode=="A") THEN
 	#{	
-	
-		sv_a = ""
-		sv_a = sv_a + "srl1| select max(srl_num) from  CUSTOM.CIMM_COVER where ins_id='"+CUST.CLIMM.insId+"' "
-		print(sv_a)
-				
-		sv_b = urhk_dbSelectWithBind(sv_a)
-		print(sv_b)
-		
-		IF(sv_b != 0) THEN
-		#{
-			CUST.CLIMM.isError = "Y"
-			CUST.CLIMM.errMsg = "Query Exection Failed"
-			GOTO ENDOFSCRIPT
-		#}
-		ELSE
-		#{
-			CUST.CLIMM.isError = "N"
-			CUST.CLIMM.srl = cint(BANCS.OUTPARAM.srl1) + 1
-		#}
-		ENDIF
 			sv_x = 1
 			CUST.CLIMM.txtRecCount = BANCS.INPUT.insCover2
 			print(CUST.CLIMM.txtRecCount)
-	
+		CUST.CLIMM.covertype = ""
 		WHILE(sv_x < CUST.CLIMM.txtRecCount)
 		#{
 		sv_q = GETPOSITION(CUST.CLIMM.chekValA,"!")
@@ -76,7 +56,7 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 		
 		sv_q = GETPOSITION(CUST.CLIMM.policyDescA,"!")
 		CUST.CLIMM.policyDesc=  MID$(CUST.CLIMM.policyDescA, 0 ,sv_q - 1)
-		PRINT(CUST.CLIMM.policyDesc)
+		PRINT(CUST.CLIMM.chekVal)
 		CUST.CLIMM.policyDescA = MID$(CUST.CLIMM.policyDescA,sv_q,STRLEN(CUST.CLIMM.policyDescA))
 		PRINT(CUST.CLIMM.policyDescA)
 
@@ -85,7 +65,7 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 		sv_a = sv_a + "values("
 		sv_a = sv_a + "'"+CUST.CLIMM.insId+"',"		
 		sv_a = sv_a + "'"+CUST.CLIMM.policyDesc+"',"	
-		sv_a = sv_a + "'"+CUST.CLIMM.chekVal+"','Y','"+	CUST.CLIMM.srl+"') "
+		sv_a = sv_a + "'"+CUST.CLIMM.chekVal+"','Y','0') "
 		print(sv_a)
 				
 		sv_b = urhk_dbSqlWithBind(sv_a)
@@ -93,9 +73,8 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 		
 		IF(sv_b != 0) THEN
 		#{
-			BANCS.OUTPUT.successOrFailure = "F"
-			sv_u = urhk_SetOrbErr("RESULT_MSG|Renewal Failed for custom.cimm_cover_mod table")
-			sv_u = urhk_SetOrbOut("SuccessOrFailure|N" + " ")
+			CUST.CLIMM.isError = "Y"
+			CUST.CLIMM.errMsg = "Insertion failed for the CLIMM table"
 			GOTO ENDOFSCRIPT
 		#}
 		ELSE
@@ -137,7 +116,7 @@ CHECKSUM="ee3a2e02b4da3bafb820c2bb18423dfc732a6aefe8842e74a3c589822d23a82c"
 			CUST.CLIMM.TmpStr = ""
 		#}
 		endif
-		
+
 		ENDOFLOOP:
 		
 		sv_x = sv_x + 1

@@ -28,33 +28,33 @@ CHECKSUM="85354f454c3d1e3dc631b1ec173c1eb10e55bbd1539e4f330199fff02aa9c4ca"
 	sv_a = urhk_B2K_printRepos("BANCS")
 	
 	CUST.CLIMM.recCount = "0"
-	CUST.CLIMM.assetGrpId = BANCS.INPUT.assetGrpId
-	print(CUST.CLIMM.assetGrpId)
+	CUST.CLIMM.startDate = BANCS.INPUT.startDate
+	print(CUST.CLIMM.startDate)
+	CUST.CLIMM.endDate = BANCS.INPUT.endDate
+	print(CUST.CLIMM.endDate)
 	
-		sv_a =  "cif_id| "
-		sv_a = sv_a + "select distinct cif_id from custom.lamm where del_flg='N' and asst_group_id='"+ CUST.CLIMM.assetGrpId +"' "
-		PRINT(sv_a)
-		
-		sv_b = urhk_dbSelectWithBind(sv_a)
-		PRINT(sv_b)
-		
-		IF(sv_b == 0) THEN
-		#{
-				CUST.CLIMM.cif_id	= BANCS.OUTPARAM.cif_id
-	
-		#}
-		ELSE
-		#{
-			CUST.CLIMM.cif_id = "ERR"
-		#}
-		ENDIF
-		
-		sv_u = "cifId|"+CUST.CLIMM.cif_id
-		sv_v = urhk_SetOrbOut(sv_u + " ")
-
+	 sv_a = ""
+	 sv_a = sv_a + "dateDiff|select to_char(date_part('days',to_date('" + CUST.CLIMM.endDate + "','dd-mm-yyyy')- "
+	 sv_a = sv_a + " to_date('" + CUST.CLIMM.startDate + "','dd-mm-yyyy')),'9999') "
+	 sv_a = sv_a + " from dual "
 
 	
+	sv_b = urhk_dbSelectWithBind(sv_a)
+	PRINT(sv_b)
+	IF(sv_b == 0) THEN
+	#{
+		CUST.CLIMM.dateDiff = BANCS.OUTPARAM.dateDiff
+		print(CUST.CLIMM.dateDiff)
+	#}
+	else
+	#{
+		CUST.CLIMM.dateDiff = "ERR"
+	#}
+	ENDIF
 	
+	sv_u = "msg1|"+ CUST.CLIMM.dateDiff
+	sv_z = urhk_SetOrbOut(sv_u + " ")
+	print(sv_z)
 	
 	EXITSCRIPT
 	

@@ -57,7 +57,7 @@ CHECKSUM="ba8be811f5077be45f410d6ec703fc23978fe673ea97737556480b1f42d87470"
 		endif
 		
 		sv_u = "msg1|"+ CUST.CLIMM.expDate
-		sv_z = urhk_SetOrbOut(sv_u)
+		sv_z = urhk_SetOrbOut(sv_u + " ")
 		print(sv_z)
 		GOTO ENDOFSCRIPT	
 	
